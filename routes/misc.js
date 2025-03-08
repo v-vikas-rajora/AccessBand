@@ -98,10 +98,10 @@ router.put('/student/account/:action', (req, res) => {
             };
 
             hive.broadcast.customJson(
-                HIVE_KEY, // Your private posting key
-                [], // Required Posting Auth (Empty if posting on your behalf)
-                [HIVE_ACCOUNT], // Your Hive username
-                'm_activity_data', // Custom JSON ID
+                HIVE_KEY,
+                [], 
+                [HIVE_ACCOUNT],
+                'm_activity_data',
                 JSON.stringify(data),
                 (err, result) => {
                     if (err) {

@@ -243,11 +243,23 @@ router.post("/gate/:role/:action", (req, res) => {
 
                         if (action === "In") {
                             if (st_data.c_status === "In") {
-                                res.render('entry', { bandData: st_data, entryD: 'yes', barcode_type, entry_data, errorType: "AlreadyIn", action: action });
-                                return;
+                                if (['Admin', 'SuperAdmin', 'User'].includes(role)) {
+                                    console.log(entry_data);
+                                    res.render('entry', { bandData: st_data, entryD: 'yes', barcode_type, entry_data, errorType:"AlreadyIn", action: action});
+                                    return;
+                                } else {
+    
+                                    res.render('f-entry', { bandData: st_data, entryD: 'yes', name, post, barcode_type, entry_data, errorType:"AlreadyIn", role: role, f: ''});
+                                    return;
+                                }
                             } else if (st_data.status === "N") {
-                                res.render('entry', { bandData: st_data, entryD: 'none', barcode_type, entry_data, errorType: "Disable", action: action });
-                                return;
+                                if (['Admin', 'SuperAdmin', 'User'].includes(role)) {
+                                    res.render('entry', { bandData: st_data, entryD: 'none', barcode_type, entry_data, errorType:"Disable",  action: action });
+                                    return;
+                                } else {
+                                    res.render('f-entry', { bandData: st_data, entryD: 'none', barcode_type, name, post, entry_data, errorType:"Disable",  role: role, f: ''});
+                                    return;
+                                }
                             } else {
                                 q2 = `UPDATE ${barcode_type} SET c_status='In', c_id = '${date_time}' WHERE reg_no = '${st_data.reg_no}'`;
                                 errorTypeData = "success_in";
@@ -260,11 +272,21 @@ router.post("/gate/:role/:action", (req, res) => {
                             }
                         } else if (action === "Out") {
                             if (st_data.c_status === "Out") {
-                                res.render('entry', { bandData: st_data, entryD: 'yes', barcode_type, entry_data, errorType: "AlreadyOut", action: action, f_exit: '' });
-                                return;
+                                if (['Admin', 'SuperAdmin', 'User'].includes(role)) {
+                                    res.render('entry', { bandData: st_data, entryD: 'yes', barcode_type, entry_data, errorType:"AlreadyOut", action: action, f_exit: ''});
+                                    return;
+                                } else {
+                                    res.render('f-entry', { bandData: st_data, entryD: 'yes', barcode_type, name, post, entry_data, errorType:"AlreadyOut", role: role, f: '', f_exit: ''});
+                                    return;
+                                }
                             } else if (st_data.status === "N" && !force_exit) {
-                                res.render('entry', { bandData: st_data, entryD: 'none', barcode_type, entry_data, errorType: "Disable", action: action, f_exit: 'show' });
-                                return;
+                                if (['Admin', 'SuperAdmin', 'User'].includes(role)) {
+                                    res.render('entry', { bandData: st_data, entryD: 'none', barcode_type, entry_data, errorType:"Disable",  action: action, f_exit: 'show' });
+                                    return;
+                                } else {
+                                    res.render('f-entry', { bandData: st_data, entryD: 'none', barcode_type, name, post, entry_data, errorType:"Disable",  role: role, f: '', f_exit: 'show'});
+                                    return;
+                                }
                             } else {
                                 q2 = `UPDATE ${barcode_type} SET c_status='Out' WHERE reg_no = '${st_data.reg_no}'`;
                                 errorTypeData = "success_out";
@@ -379,8 +401,8 @@ router.post("/mics/activity", async (req, res) => {
     let date_time = localDateTime.toISOString().replace('T', ' ').substring(0, 19);
 
     // Hive Blockchain posting credentials
-    const postingKey = "5Jh1ocbybk3nmNWhvy9YD3LHNeSeufgJu3PxkdGmPhW6LuUJ8vf"; // Your Hive private posting key
-    const username = "vikasrajora"; // Your Hive username
+    const postingKey = "5Jh1ocbybk3nmNWhvy9YD3LHNeSeufgJu3PxkdGmPhW6LuUJ8vf";
+    const username = "vikasrajora";
 
     const jsonData = {
         reg_no: reg_no,
@@ -393,7 +415,7 @@ router.post("/mics/activity", async (req, res) => {
     const customJsonData = {
         required_auths: [],
         required_posting_auths: [username],
-        id: "entry_data",
+        id: "m_activity_data",
         json: JSON.stringify(jsonData)
     };
 
@@ -430,7 +452,6 @@ router.post("/scan/master/card", (req, res) => {
         }
 
         if (results.length > 0) {
-            // Store name and post in the session
             req.session.tempMasterData = {
                 name: results[0].name,
                 post: results[0].post
