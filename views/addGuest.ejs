@@ -1,0 +1,418 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+
+    <link rel="stylesheet" href="/CSS/sty.css">
+
+    <style>
+        /* Other styles */
+        .input {
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .input_area {
+            padding: 0px;
+            padding-top: 0px;
+            margin-left: 0px !important;
+        }
+
+        /* Background color overr
+        ide */
+        body {
+            background-color: #a8c0ff !important;
+        }
+
+        .content-wrapper{
+            padding-left: 20px;
+            padding-top: 0px;
+        }
+        .box-header{
+            padding-bottom: 10px;
+        }
+        .input{
+            width: 300px !important;
+        }
+
+        .data_head.right{
+            max-width: 20px;
+        }
+
+        .data_head.left{
+            max-width: 25px;
+        }
+
+        .left_data {
+            max-width: 70px;
+        }
+
+        .right_data{
+            max-width: 70px;
+        }
+
+        input:disabled, #relation.disable {
+            background-color: #f0f0f0;
+        } 
+
+        #logout-btn{
+            padding: 7px 15px;
+        }
+
+        .btnArea{
+            padding: 50px 0px 20px 20px;
+        }
+
+        #cancelBtn, #submitEntryBtn{
+            padding: 2px 15px;
+            border-radius: 3px;
+        }
+
+        #submitEntryBtn{
+            background-color: #4C6A92;
+            color: #fff;
+            border-color: #4C6A92;
+            padding: 2.5px 20px;
+        }
+
+        video, canvas, img {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        img {
+            display: none;  /* Initially hide the image */
+        }
+
+        .imageBtnArea{
+            height: 50px;
+            padding-top: 10px;
+        }
+
+        #openBtnWebcam {
+            position: absolute;
+            top: 90px;  /* Set the top offset */
+            left: 50%;
+            transform: translateX(-50%);  /* Center the button horizontally */
+            z-index: 10;  /* Ensure button is above other elements */
+            height: 30px;
+            width: 100px;
+            font-size: 13px;
+            border-radius: 2px;
+        }
+
+        .imageBtnArea button {
+            font-size: 13px;
+            padding: 2px 20px;
+            border-radius: 2px;
+            margin-left: 10px;
+        }
+
+        #reg_no_s.input_reg{
+            width: 200px !important;
+            margin-left: 0px !important;
+        }
+    </style>
+</head>
+
+
+<body>
+    <%- include('./include/sidebaar.ejs', {role: user_access_data.role, name: user_access_data.name, post: user_access_data.post}) %>
+
+    <div class="content">
+        <div class="content-box">
+            <!-- Box header with title and button -->
+            <div class="box-header">
+                <h2 style="font-weight: bold;">Add Guest / Vender</h2>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="input-container">
+                    <div class="input_area" style="display: flex; align-items: center;">
+                        <input class="input input_reg" id="reg_no_s" name="input-text" placeholder="Employee I'd" type="text">
+                    </div>
+                    
+                    <div class="data-info">
+                        <table>
+
+                            <tr>
+                                <td class="data_head left"><strong>Employee Name</strong></td>
+                                <td class="left_data">:&nbsp;&nbsp; <input type="text" name="eName" class="input" id="eName" value="" disabled></td>
+                                <td class="data_head right"><strong>Email I'd</strong></td>
+                                <td class="right_data">:&nbsp;&nbsp; <input type="text" name="eEmail" class="input" id="eEmail" disabled required></td>
+                            </tr>
+
+                            <tr>
+                                <td class="data_head left"><strong>Person Type</strong></td>
+                                <td class="left_data">:&nbsp;&nbsp; 
+                                    <select name="" class="input" id="type">
+                                        <option value="" selected disabled>Select Person Type</option>
+                                        <option value="Family">Family Person</option>
+                                        <option value="Offical">Offical Person</option>
+                                    </select>
+                                </td>
+                                <td class="data_head right"><strong>Relation</strong></td>
+                                <td class="right_data">:&nbsp;&nbsp; 
+                                    <select name="" class="input" id="relation">
+                                        <option value="" selected disabled>Select Relation</option>
+                                        <option value="Spouse">Spouse</option>
+                                        <option value="Son">Son</option>
+                                        <option value="Daughter">Daughter</option>
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="data_head left"><strong>Name</strong></td>
+                                <td class="left_data">:&nbsp;&nbsp; <input type="text" name="name" class="input" placeholder="Enter Full Name" id="name" required></td>
+                                <td class="data_head right"><strong>Mobile</strong></td>
+                                <td class="right_data">:&nbsp;&nbsp; <input type="number" name="mobile" class="input" placeholder="Enter Mobile Number" id="mobile" required></td>
+                            </tr>
+                            <tr>
+                                <td class="data_head left"><strong>Email I'd</strong></td>
+                                <td class="left_data">:&nbsp;&nbsp; <input type="email" name="email" placeholder="Enter Email I'd" class="input" id="email"></td>
+                                <td class="data_head right"><strong>Remark</strong></td>
+                                <td class="right_data">:&nbsp;&nbsp; <input type="text" name="remark" placeholder="Enter Remark" class="input" id="remark" required></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <input type="hidden" id="photo_path" name="photo_path" value="">
+                    <div class="btnArea">
+                        <button type="button" id="submitEntryBtn">Submit</button> &nbsp;&nbsp;
+                    </div>
+                </div>
+            
+                <div class="imageArea">
+                    <div class="image-container" id="imageContainer">
+                        <button id="openBtnWebcam">Capture Image</button>
+                        <video id="video" autoplay style="display: none;"></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                        <img id="photo" src="" alt="" />
+                    </div>
+
+                    <div class="imageBtnArea">
+                        <button id="captureBtn" style="display:none;">Capture</button>
+                        <button id="uploadBtn" style="display:none;">Upload</button>
+                        <button id="retakeBtn" style="display:none;">Retake</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</body>
+
+<script>
+    document.getElementById('reg_no_s').focus();
+
+    document.getElementById('reg_no_s').addEventListener('keydown', function(event) {
+        // Check if Enter key is pressed
+        if (event.key === 'Enter') {
+            const empId = document.getElementById('reg_no_s').value;
+
+            if (empId) {
+                // Fetch the data from the API
+                fetchData(empId);
+            }
+        }
+    });
+
+    document.getElementById('type').addEventListener('change', function() {
+        var relationSelect = document.getElementById('relation');
+        
+        if (this.value === 'Offical') {
+            relationSelect.value = '';  // Set value to blank
+            relationSelect.disabled = true;  // Disable the select
+            relationSelect.classList.add('disable');
+        } else {
+            relationSelect.disabled = false;  // Enable the select
+            relationSelect.classList.remove('disable');
+        }
+    });
+    
+    function fetchData(empId) {
+        // Assuming you have a backend API endpoint "entry/add/guest/:emp_id"
+        fetch(`/entry/add/guest/${empId}`)
+            .then(response => response.json())
+            .then(data => {
+                // Populate the data into the relevant fields
+                document.getElementById('eName').value = data.name;
+                document.getElementById('eEmail').value = data.email
+                document.getElementById('name').value = '';
+                document.getElementById('mobile').value = '';
+                document.getElementById('email').value = ''; 
+                document.getElementById('remark').value = '';
+
+                document.getElementById('type').focus();
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                alert(error);
+            });
+    }
+    
+    document.getElementById('submitEntryBtn').addEventListener('click', function() {
+        const reg_no = document.getElementById('reg_no_s').value;
+        const type = document.getElementById('type').value;
+        const relation = document.getElementById('relation').value;
+        const name = document.getElementById('name').value;
+        const mobile = document.getElementById('mobile').value;
+        const email = document.getElementById('email').value;
+        const remark = document.getElementById('remark').value;
+        const photo_path = document.getElementById('photo_path').value;  // Assuming photo_path is an input field
+    
+        // Mobile number validation (exactly 10 digits)
+        if (mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
+            alert('Please enter a valid mobile number with exactly 10 digits.');
+            return;
+        }
+    
+        // Check if the photo path is not empty
+        if (photo_path.trim() === "") {
+            alert('Please capture and upload a live photo.');
+            return;
+        }
+    
+        // Prepare data for submission
+        const data = {
+            emp_id: reg_no,
+            name: name,
+            mobile: mobile,
+            email: email,
+            remark: remark,
+            type: type,
+            relation: relation,
+            photoPath: photo_path
+        };
+    
+        // Send data to API
+        fetch('/entry/add/guest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Data submitted successfully!');
+                window.location.replace('/entry/add/guest');
+            } else {
+                alert(data.message);  // Show error message returned by the backend
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
+    
+
+    const openBtnWebcam = document.getElementById('openBtnWebcam');
+    const captureBtn = document.getElementById('captureBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photo = document.getElementById('photo');
+    const imageContainer = document.getElementById('imageContainer');
+
+    openBtnWebcam.addEventListener('click', () => {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+                video.style.display = 'block';
+                captureBtn.style.display = 'inline-block';  // Show Capture button after opening webcam
+                openBtnWebcam.style.display = 'none';  // Hide Open button after webcam is opened
+            })
+            .catch((err) => {
+                console.log('Error accessing webcam:', err);
+            });
+    });
+
+    // Capture photo
+    captureBtn.addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Capture image as PNG
+        const dataURL = canvas.toDataURL('image/png');  
+
+        // Display captured image in the same container
+        photo.src = dataURL;
+        photo.style.display = 'block';
+        video.style.display = 'none';  // Hide video stream once captured
+
+        // Show Upload and Retake buttons
+        uploadBtn.style.display = 'inline-block';
+        retakeBtn.style.display = 'inline-block';
+        captureBtn.style.display = 'none';  // Hide Capture button after photo is taken
+    });
+
+    retakeBtn.addEventListener('click', () => {
+        photo.style.display = 'none';  // Hide the captured image
+        captureBtn.style.display = 'inline-block';  // Show Capture button again
+        uploadBtn.style.display = 'none';  // Hide Upload button
+        retakeBtn.style.display = 'none';  // Hide Retake button
+
+        video.style.display = 'block';  // Show video stream again
+    });
+
+    uploadBtn.addEventListener('click', () => {
+        const dataURL = photo.src;  // Get the captured image URL (Base64 encoded image)
+    
+        // Extract the image data (remove the data:image/png;base64 part)
+        const base64Data = dataURL.split(',')[1];
+    
+        // Convert base64 data to a Blob
+        const byteCharacters = atob(base64Data);  // Decode the base64 string
+        const byteArrays = [];
+    
+        for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+            const slice = byteCharacters.slice(offset, offset + 1024);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+    
+        const blob = new Blob(byteArrays, { type: 'image/png' });
+        const file = new File([blob], 'image.png', { type: 'image/png' });
+    
+        // Create FormData to send as multipart/form-data
+        const formData = new FormData();
+        formData.append('image', file);  // Add the image file to FormData
+    
+        fetch(`/student/photo/upload/master/masterForm`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Image uploaded successfully!');
+            uploadBtn.style.display = 'none';
+            retakeBtn.style.display = 'none';
+            captureBtn.style.display = 'none';
+            document.getElementById('photo_path').value = data.path;
+            document.getElementById('name').focus();
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Failed to upload image');
+        });
+        
+    }); 
+</script>

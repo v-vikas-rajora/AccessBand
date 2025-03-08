@@ -1,0 +1,313 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(135deg, #f1f1f1, #a8c0ff);
+}
+
+.header {
+    background: #4C6A92;
+    color: white;
+    height: 10px;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+/* Name of Rakesh Gupta outside the sidebar, just below the header */
+.user-name {
+    position: absolute;
+    top: 60px; /* Positioning below the header */
+    left: 20px; /* Align it to the left */
+    font-size: 18px;
+    font-weight: bold;
+    color: #4C6A92;
+}
+
+.sidebar {
+    width: 250px;
+    background: white;
+    color: #333333;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: calc(100vh - 0px); /* Adjust the height for the header */
+    margin-top: 0px; /* Sidebar starts after header */
+}
+
+.sidebar .title {
+    color: #4C6A92;
+    font-size: 24px;
+    margin-bottom: 0px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #333333;
+    padding: 10px;
+    border-radius: 5px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.3s ease;
+    justify-content: flex-start;
+    width: 100%; /* Make the buttons fill the full width */
+    font-size: 15px;
+}
+
+.sidebar a:focus,
+.sidebar a:active {
+    background: #ddd;
+    color: black;
+}
+
+.sidebar i {
+    font-size: 14px;
+    width: 24px;
+    text-align: center;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    padding-top: 0px;
+    background: transparent;
+    margin-top: 0px; /* Adjust the content position */
+}
+
+/* New box for content area */
+.content-box {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 38px !important;
+    padding-bottom: 10px;
+}
+
+/* Heading and button container */
+.box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    padding: 20px;
+}
+
+.box-header h2 {
+    font-size: 20px;
+    color: #4C6A92;
+}
+
+.input {
+    height: 32px;
+    padding: 5px;
+    border: 1px solid #ccc; /* Default border */
+    border-radius: 4px; /* Rounded corners */
+    transition: all 0.3s ease; /* Smooth transition */
+    background-color: #fff; /* Default background color */
+}
+
+.input_area {
+    padding: 0px;
+    padding-top: 0px;
+}
+
+/* Focus state for the input */
+.input:focus {
+    outline: none; /* Remove default focus outline */
+    border-color: #007bff; /* Border color on focus */
+    background-color: #f4f6f9; /* Light background color when focused */
+}
+
+/* Image container style */
+/* New CSS for content box layout */
+/* Content box layout */
+        /* Content box layout */
+/* Content box layout */
+.content-box {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    padding: 0px;
+}
+
+/* Wrapper to keep input and image side by side */
+.content-wrapper {
+    display: flex;
+    padding: 20px;
+    padding-top: 0px;
+    justify-content: space-between;
+    align-items: flex-start; /* Align both input and image at the top */
+}
+
+/* Input container style */
+.input-container {
+    flex-grow: 1; /* Makes the input field take available space */
+}
+
+/* Passport size image container */
+.image-container {
+    position: relative;
+    margin-top: 20px;
+    margin-right: 20px;
+
+    width: 200px; /* Width of passport photo */
+    height: 230px; /* Height of passport photo */
+    overflow: hidden; /* To ensure image doesn't overflow */
+    border: 2px solid #4C6A92;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensure the image covers the container while maintaining aspect ratio */
+}
+
+/* Move input field to the top of the container */
+.input_area {
+    margin-bottom: 10px; /* Optional: Adds space below input */
+}
+
+
+#barcode_input{
+    margin-left: 60px;
+}
+
+.data-info {
+    margin-left: 22px;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #333333;
+}
+
+.data-info p {
+    margin-bottom: 5px;
+}
+
+.data-info table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+.data-info table td {
+    padding: 10px .0px;
+    
+    text-align: left;
+}
+
+.data-info table td strong {
+    font-weight: bold;
+}
+
+
+.input:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: #f4f6f9;
+}
+
+/* General styles for the table */
+.entryData {
+    width: 93%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    margin-left: 40px;
+    font-size: 16px;
+    overflow: auto; /* Yeh table ko horizontal aur vertical scroll karne dega agar zarurat ho */ 
+}
+
+.entryData th, .entryData td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.entryData th {
+    background-color: #f4f6f9;  /* Background for header */
+    font-weight: bold;
+    position: sticky;
+    top: -5px;  /* Adjust this value to move the header up */
+    z-index: 2;  /* Ensure header stays above other content */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);  /* Optional: shadow for header */
+}
+
+.entryData td {
+    background-color: #fff;
+}
+
+.entryData tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.aaa{
+    pointer-events: none;
+    color: transparent;
+}
+
+.entryTable {
+    overflow: auto;
+    height: 250px;
+    position: relative;
+    z-index: 1;  /* Ensures table content scrolls beneath sticky header */
+    padding-top: 0px;
+    margin-top: 0px;
+}
+
+
+.create-btn {
+    background-color: #4C6A92;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+h2{
+    font-weight: bold !important;
+}
+
+.content{
+    max-height: calc(100vh - 500px);
+}
+.content-box{
+    max-height: calc(100vh - 40px);
+}
+
+body{
+    overflow: hidden;
+}
+
+.left_data{
+    max-width: 150px;
+}
+
+.data_head.left{
+    max-width: 40px;
+}
+
+.data_head.right{
+    max-width: 40px;
+}

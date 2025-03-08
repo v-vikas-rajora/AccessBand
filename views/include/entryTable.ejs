@@ -1,0 +1,46 @@
+<table class="entryData">
+    <thead>
+        <tr>
+            <th>Date In</th>
+            <th>Time In</th>
+            <th>Date Out</th>
+            <th>Time Out</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% 
+        // Reverse the entry data array to show latest first
+        entry_data.reverse().forEach(function(entry) { 
+            
+            let dateIn = new Date(entry.date_time_in);
+            let formattedDateIn = dateIn.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+            // Reorder the date to "DD-MMM-YYYY"
+            let dateParts = formattedDateIn.split(' ');
+            formattedDateIn = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`;
+            
+            let formattedTimeIn = dateIn.toLocaleTimeString('en-US', { hour12: true });
+
+            // Check if date_time_out exists before formatting
+            let formattedDateOut = 'N/A';
+            let formattedTimeOut = 'N/A';
+            if (entry.date_time_out) {
+                let dateOut = new Date(entry.date_time_out);
+                formattedDateOut = dateOut.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                
+                // Reorder the date to "DD-MMM-YYYY"
+                let dateOutParts = formattedDateOut.split(' ');
+                formattedDateOut = `${dateOutParts[0]}-${dateOutParts[1]}-${dateOutParts[2]}`;
+                
+                formattedTimeOut = dateOut.toLocaleTimeString('en-US', { hour12: true });
+            }
+        %>
+            <tr>
+                <td data-label="Date In"><%= formattedDateIn %></td>
+                <td data-label="Time In"><%= formattedTimeIn %></td>
+                <td data-label="Date Out"><%= formattedDateOut %></td>
+                <td data-label="Time Out"><%= formattedTimeOut %></td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>

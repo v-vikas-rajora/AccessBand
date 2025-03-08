@@ -1,0 +1,222 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+
+    <link rel="stylesheet" href="/CSS/style.css">
+
+    <style>
+        body{
+            background: linear-gradient(135deg, #f1f1f1, #a8c0ff);
+        }
+    </style>
+</head>
+<body>
+    <%- include('./include/sidebaar.ejs', {role: user_access_data.role, name: user_access_data.name, post: user_access_data.post}) %>
+
+    <div class="content">
+        <!-- Content box with rounded corners -->
+        <div class="content-box">
+            <!-- Box header with title and button -->
+            <div class="box-header">
+                <h2>Manage Users</h2>
+                <button class="create-btn" onclick="openModal()">+ Create</button>
+            </div>
+
+            <%- include('./include/users.ejs') %>
+        </div>
+    </div>
+
+    <%- include('./include/createUser.ejs') %>
+    <%- include('./include/masterForm.ejs') %>
+</body>
+
+
+<script>
+    // Open modal function
+// Open modal for creating a new user
+    function openModal() {
+        document.getElementById('user_form_header').innerText = 'Create New User';
+        document.getElementById('createUserModal').style.display = 'flex';
+        document.getElementById('createUserForm').reset(); // Reset the form
+        document.querySelector('.create_user_submit').innerText = 'Submit'; // Set submit button to 'Submit'
+        document.getElementById('createUserForm').dataset.action = 'create'; // Track form action
+        document.getElementById('password').setAttribute('required');
+    }
+
+    // Open modal for updating a user
+    function openUpdateModal(button) {
+        const userId = button.getAttribute('data-user-id');
+        const name = button.getAttribute('data-name');
+        const post = button.getAttribute('data-post');
+        const username = button.getAttribute('data-username');
+        const role = button.getAttribute('data-role');
+    
+        document.getElementById('name').value = name;
+        document.getElementById('post').value = post;
+        document.getElementById('username').value = username;
+        document.getElementById('role').value = role;
+        document.getElementById('password').value = '';
+        document.getElementById('password').removeAttribute('required');
+    
+        document.querySelector('.create_user_submit').innerText = 'Update'; // Change button text to Update
+        document.getElementById('createUserForm').dataset.action = 'update'; // Track form action
+        document.getElementById('createUserForm').dataset.userId = userId; // Store the user ID for update
+        document.getElementById('user_form_header').innerText = 'Update Existing User';
+    
+        document.getElementById('createUserModal').style.display = 'flex';
+    }
+    
+    // Close the modal
+    function closeModal() {
+        document.getElementById('createUserModal').style.display = 'none';
+    }
+
+    function openMasterForm(button) {
+        const username = button.getAttribute('data-username');
+        const masterId = button.getAttribute('data-master-id');
+        const role = button.getAttribute('data-user-role');
+
+        if (role === 'Admin') {
+            if (masterId) {
+                document.getElementById('master_form_header').innerText = 'Update Master Card';
+                document.getElementById('master_id_input').value = masterId;
+                document.getElementById('edit-icon').style.visibility = 'visible';
+                document.getElementById('master_id_input').disabled = true;
+            } else {
+                document.getElementById('master_form_header').innerText = 'Register Master Card';
+                document.getElementById('edit-icon').style.visibility = 'hidden';
+                document.getElementById('master_id_input').disabled = false;
+            }
+            
+            document.getElementById('master_username').value = username;
+            document.getElementById('masterFormModel').style.display = 'flex';
+            document.getElementById('master_id_input').focus();
+        }
+
+    }
+
+    function closeMasterModal() {
+        document.getElementById('masterFormModel').style.display = 'none';
+    }
+
+    // Form submission handler
+    // Update form submission handler
+    // Form submission handler
+    document.getElementById('createUserForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        const post = document.getElementById('post').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const role = document.getElementById('role').value;  // Get selected role
+        
+        const action = document.getElementById('createUserForm').dataset.action; // "create" or "update"
+        const userId = document.getElementById('createUserForm').dataset.userId; // Only available if updating
+    
+        if (action === 'create') {
+            // If creating a new user
+            fetch('/users/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, post, username, password, role })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal after user is created
+                    closeModal();
+                    
+                    // Dynamically add the new user to the table
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td style="padding-left: 30px;">${data.user.name}</td>
+                        <td>${data.user.username}</td>
+                        <td>${data.user.post}</td>
+                        <td>
+                            <select class="role-select" data-user-id="${data.user.username}">
+                                <option value="Admin" ${data.user.role === 'Admin' ? 'selected' : ''}>Admin</option>
+                                <option value="User" ${data.user.role === 'User' ? 'selected' : ''}>User</option>
+                                <option value="InUser" ${data.user.role === 'InUser' ? 'selected' : ''}>InUser</option>
+                                <option value="OutUser" ${data.user.role === 'OutUser' ? 'selected' : ''}>OutUser</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="update-btn" 
+                                data-user-id="${data.user.username}"
+                                data-name="${data.user.name}"
+                                data-post="${data.user.post}"
+                                data-username="${data.user.username}"
+                                data-role="${data.user.role}"
+                                onclick="openUpdateModal(this)">
+                                <i class="fas fa-edit"></i> Update
+                            </button>
+                            <button class="action-btn" data-user-id="${data.user.username}" data-status="${data.user.status}">
+                                <i class="fas ${data.user.status === 'N' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i> 
+                                ${data.user.status === 'N' ? 'Enable' : 'Disable'}
+                            </button>
+                            <button class="delete-btn" data-user-id="${data.user.username}">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </td>
+                    `;
+                    
+                    document.querySelector('#userTable tbody').appendChild(newRow);
+                } else {
+                    alert('Error creating user');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        } else if (action === 'update') {
+            // If updating an existing user
+            fetch(`/users/update/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, post, username, role, password }) // Send the role as selected from the dropdown
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal after update
+                    closeModal(); 
+                    alert('User updated successfully!');
+                    
+                    // Update the user row dynamically in the table
+                    const updatedRow = document.querySelector(`[data-user-id="${userId}"]`).closest('tr');
+                    
+                    // Update table data with new values (name, post, username, role)
+                    updatedRow.querySelector('td:nth-child(1)').innerText = name;
+                    updatedRow.querySelector('td:nth-child(2)').innerText = username;
+                    updatedRow.querySelector('td:nth-child(3)').innerText = post;
+    
+                    // Update role with the selected value in the table
+                    const roleSelect = updatedRow.querySelector('.role-select');
+                    roleSelect.value = role; // Update the role dropdown in the table
+                    
+                    // Optionally, update the button with the new data (if needed)
+                    const updateButton = updatedRow.querySelector('.update-btn');
+
+                    updateButton.setAttribute('data-user-id', username);
+                    updateButton.setAttribute('data-name', name);
+                    updateButton.setAttribute('data-post', post);
+                    updateButton.setAttribute('data-username', username);
+                    updateButton.setAttribute('data-role', role);
+                } else {
+                    alert('Error updating user');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    });
+    
+
+
+</script>

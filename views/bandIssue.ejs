@@ -1,0 +1,487 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+    <style>
+        .input {
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .input_area {
+            padding: 20px;
+            padding-top: 0px;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #007bff;
+            background-color: #f4f6f9;
+        }
+
+     
+        body{
+            background: linear-gradient(135deg, #f1f1f1, #a8c0ff);
+        }   
+       
+        video, canvas, img {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        img {
+            display: none;  /* Initially hide the image */
+        }
+
+        .imageBtnArea{
+            height: 50px;
+            padding-top: 10px;
+        }
+
+        #openBtnWebcam {
+            position: absolute;
+            top: 90px;  /* Set the top offset */
+            left: 50%;
+            transform: translateX(-50%);  /* Center the button horizontally */
+            z-index: 10;  /* Ensure button is above other elements */
+            display: none;  /* Hide initially */
+            height: 30px;
+            width: 100px;
+            font-size: 13px;
+            border-radius: 2px;
+        }
+
+        .imageBtnArea button {
+            font-size: 13px;
+            padding: 2px 20px;
+            border-radius: 2px;
+            margin-left: 10px;
+        }
+
+        #barcode_input.daySch{
+            border: 2px solid blue;
+            background-color: rgb(228, 228, 244);
+            transition: all 0s ease-in-out;
+        }
+
+        #barcode_input.hostel{
+            border: 2px solid red;
+            background-color: rgb(239, 220, 220);
+            transition: all 0s ease-in-out;
+        }
+        
+        #barcode_input.transport{
+            border: 2px solid yellow;
+            background-color: rgb(244, 244, 209);
+            transition: all 0s ease-in-out;
+        }
+        
+        #barcode_input.laskshya{
+            border: 2px solid orange;
+            background-color: rgb(244, 233, 213);
+            transition: all 0s ease-in-out;
+        }
+
+        #barcode_input.faculty{
+            /*border: 2px solid orange;
+            background-color: rgb(244, 233, 213);*/
+            border: 2px solid black;
+            background-color: rgb(231, 229, 229);
+            transition: all 0s ease-in-out;
+        }
+        
+    </style>
+    <link rel="stylesheet" href="/CSS/sty.css">
+</head>
+
+<body>
+    <%- include('./include/sidebaar.ejs', {role: user_access_data.role, name: user_access_data.name, post: user_access_data.post}) %>
+
+    <div class="content">
+        <div class="content-box">
+            <div class="box-header">
+                <h2>Band Issue</h2>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="input-container">
+                    <div class="input_area">
+                        <select class="input" style="padding: 0px; padding-left: 10px; padding-right: 5px;" name="" id="year-select">
+                            <option value="" selected disabled>Year</option>
+                            <option value="2019">2019</option>
+                            <option value="2020">2020</option>
+                            <option value="2021">2021</option>
+                            <option value="2022">2022</option>
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="FAC">STAFF</option>
+                            <option value="PIET">PIET</option>
+                            <option value="PCE">PCE</option>
+                            <option value="GUEST">GUEST</option>
+                        </select>
+                        
+                        &nbsp;&nbsp;<em id="em_tag">/</em>&nbsp;&nbsp;
+                        
+                        <input class="input input_reg" id="reg_no_s" name="input-text" placeholder="Reg. number" type="text">
+
+                        <input class="input" placeholder="Reg. No." name="reg_no" id="reg_no" value="<%=barcode_type === 'faculty_data' ? 'FAC/' : barcode_type === 'guest_data' ? 'GUEST/' : ''%><%= bandData.reg_no%>" type="hidden" >
+                    
+                        <% if (bandData.barcode) { %>
+                            <input class="input" style="background-color: rgb(230, 239, 239);" placeholder="Barcode No." value="<%= bandData.barcode %>" id="barcode_input" type="text" disabled>
+                        <% } else { %>
+                            <input class="input" placeholder="Barcode No."  id="barcode_input" type="text">
+                        <% } %>
+                      
+                    </div>
+
+
+                    <%- include('./include/data.ejs', { bandData: bandData, type: barcode_type }) %>
+                </div>
+
+                <div class="imageArea">
+                    <div class="image-container" id="imageContainer">
+                        <button id="openBtnWebcam">Capture Image</button>
+                        <video id="video" autoplay style="display: none;"></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                        <img id="photo" src="" alt="" />
+                    </div>
+
+                    <div class="imageBtnArea">
+                        <button id="captureBtn" style="display:none;">Capture</button>
+                        <button id="uploadBtn" style="display:none;">Upload</button>
+                        <button id="retakeBtn" style="display:none;">Retake</button>
+                    </div>
+
+                    <input type="hidden" name="" id="photoPathInput" value="">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    const photoPath = "<%=bandData.photo_path%>"
+    const photoPathIn = document.getElementById('photoPathInput');
+
+    let imagePath;
+
+    var regNo = "<%= bandData.reg_no %>";  // Get the reg_no value
+    var barcodeType = "<%= barcode_type %>";
+    var firstFourDigits = regNo.substring(0, 4); // Get the first 4 digits
+
+    if (barcodeType === 'faculty_data') {
+        firstFourDigits = 'FAC';
+        imagePath = `/staff-Images/${photoPath}.jpg`;
+    } else if (barcodeType === 'student_data') {
+        imagePath = `/Images/${photoPath}.jpg`;
+    }  else if (barcodeType === 'guest_data') {
+        imagePath = `/master-entry-Images/${photoPath}.jpg`;
+        
+    }
+    
+    var selectElement = document.getElementById("year-select");
+
+    for (var i = 0; i < selectElement.options.length; i++) {
+        var optionValue = selectElement.options[i].value;
+
+        if (optionValue === firstFourDigits) {
+            selectElement.selectedIndex = i;
+            break;
+        }
+    }
+
+    const openBtnWebcam = document.getElementById('openBtnWebcam');
+    const captureBtn = document.getElementById('captureBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photo = document.getElementById('photo');
+    const imageContainer = document.getElementById('imageContainer');
+
+    function checkImage() {
+        const img = new Image();
+        img.onload = () => {
+            openBtnWebcam.style.display = 'none';
+            photo.src = imagePath;
+            photo.style.display = 'block';
+            photoPathIn.value = 'Yes';
+        };
+        img.onerror = () => {
+            openBtnWebcam.style.display = 'inline-block';
+            photoPathIn.value = 'No';
+        };
+        img.src = imagePath;
+    }
+
+    checkImage();
+
+    openBtnWebcam.addEventListener('click', () => {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+                video.style.display = 'block';
+                captureBtn.style.display = 'inline-block';
+                openBtnWebcam.style.display = 'none';
+            })
+            .catch((err) => {
+                console.log('Error accessing webcam:', err);
+            });
+    });
+
+    // Capture photo
+    captureBtn.addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Capture image as PNG
+        const dataURL = canvas.toDataURL('image/png');  
+
+        // Display captured image in the same container
+        photo.src = dataURL;
+        photo.style.display = 'block';
+        video.style.display = 'none';  // Hide video stream once captured
+
+        // Show Upload and Retake buttons
+        uploadBtn.style.display = 'inline-block';
+        retakeBtn.style.display = 'inline-block';
+        captureBtn.style.display = 'none';  // Hide Capture button after photo is taken
+    });
+
+    retakeBtn.addEventListener('click', () => {
+        photo.style.display = 'none';  // Hide the captured image
+        captureBtn.style.display = 'inline-block';  // Show Capture button again
+        uploadBtn.style.display = 'none';  // Hide Upload button
+        retakeBtn.style.display = 'none';  // Hide Retake button
+
+        video.style.display = 'block';  // Show video stream again
+    });
+
+    uploadBtn.addEventListener('click', () => {
+        console.log('Upload button clicked');
+    
+        const dataURL = photo.src;  // Get the captured image URL (Base64 encoded image)
+        console.log('Data URL:', dataURL);
+    
+        // Extract the image data (remove the data:image/png;base64 part)
+        const base64Data = dataURL.split(',')[1];
+    
+        // Convert base64 data to a Blob
+        const byteCharacters = atob(base64Data);  // Decode the base64 string
+        const byteArrays = [];
+    
+        for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+            const slice = byteCharacters.slice(offset, offset + 1024);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+    
+        const blob = new Blob(byteArrays, { type: 'image/png' });
+        const file = new File([blob], 'image.png', { type: 'image/png' });
+    
+        // Create FormData to send as multipart/form-data
+        const formData = new FormData();
+        formData.append('image', file);  // Add the image file to FormData
+    
+        fetch(`/student/photo/upload/${encodeURIComponent(regNo)}/${barcodeType}`, {
+            method: 'POST',
+            body: formData  // Send the FormData directly
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Image uploaded successfully!');
+            uploadBtn.style.display = 'none';
+            retakeBtn.style.display = 'none';
+            captureBtn.style.display = 'none';
+            document.getElementById('photoPathInput').value = 'Yes';
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Failed to upload image');
+        });
+        
+    });
+    
+    const data = "<%=bandData.barcode%>";
+
+    if (data) {
+        const barcodeInput = document.getElementById('reg_no_s');
+        barcodeInput.focus();      // Focus on the input field
+        barcodeInput.select();     // Select all text inside the input field
+        
+    } else {
+        const barcodeInput = document.getElementById('barcode_input').focus();
+    }
+
+
+
+    document.getElementById('reg_no_s').addEventListener('keypress', function(event) {
+        // Check if the Enter key (key code 13) was pressed
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission and page refresh
+            submitForm();
+        }
+    });
+    
+    function submitForm() {
+        // Get the value from the input field
+        var regNo = document.getElementById('reg_no').value;
+    
+        // Create a form element
+        var form = document.createElement('form');
+        form.action = '/band/issue';
+        form.method = 'get';
+    
+        // Create a hidden input element
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'reg_no'; // The parameter name you want to send
+        input.value = regNo;
+    
+        // Append the input to the form
+        form.appendChild(input);
+    
+        // Append the form to the body (not visible)
+        document.body.appendChild(form);
+    
+        // Submit the form
+        form.submit();
+    }
+    
+
+    document.getElementById('barcode_input').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            const barcodeNo = document.getElementById('barcode_input').value;
+            const regNo = document.getElementById('reg_no').value;
+            const year = document.getElementById('year-select');
+    
+            if (barcodeNo.length !== 7) {
+                alert("Invalid Barcode.");
+                return; // Stop the form submission if barcode is invalid
+            }
+
+            if (photoPathIn.value !== "Yes") {
+                alert('Please capture and upload live photo.');
+                return;
+            }
+    
+            if (barcodeNo && regNo) {
+                fetch(`/band/issue`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        regNo: regNo,
+                        barcodeNo: barcodeNo
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Disable the barcode input field
+                        const barcodeInput = document.getElementById('barcode_input');
+                        barcodeInput.disabled = true;
+    
+                        // Change the background color of the barcode input to light gray
+                        barcodeInput.style.backgroundColor = 'rgb(230, 239, 239)';
+    
+                        // Focus on the reg_no input field and select all text inside it
+                        const regNoInput = document.getElementById('reg_no_s');
+                        const yearValue = year.value;
+
+                        regNoInput.focus();
+                        regNoInput.select();
+                        year.value = yearValue;
+    
+                        alert('Barcode registered successfully!');
+                    } else {
+                        // If barcode already assigned, reset the barcode input field value to 0
+                        const barcodeInput = document.getElementById('barcode_input');
+                        barcodeInput.select(); // Reset the value to '0'
+    
+                        alert(data.message);  // Display the message from the backend if it fails
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error occurred while updating barcode');
+                });
+            }
+        }
+    });
+    
+     
+    document.getElementById('year-select').addEventListener('change', handleYearChange);
+    document.getElementById('reg_no_s').addEventListener('input', updateHiddenInput);
+    
+    function handleYearChange() {
+        // Clear the input field and focus when year is changed
+        document.getElementById('reg_no_s').value = ''; 
+        document.getElementById('reg_no_s').focus(); 
+    
+        // We also need to update the hidden input with just the year (without registration number)
+        var year = document.getElementById('year-select').value;
+        document.getElementById('reg_no').value = year ? year + '/' : '';
+    }
+    
+    function updateHiddenInput() {
+        var inputText = document.getElementById('reg_no_s').value;
+        var year = document.getElementById('year-select').value;
+    
+        // If both year and inputText are available, update the hidden input
+        if (year && inputText) {
+            var formattedValue = year + '/' + inputText;
+            document.getElementById('reg_no').value = formattedValue;
+        }
+    }
+
+
+
+    // Assuming bandData is already available and has a 'type' property
+    let barcodeInput = document.getElementById('barcode_input');
+    let sType = "<%=bandData.type%>";
+    let exBarcodeNo = "<%=bandData.barcode%>";
+
+    if (!exBarcodeNo) {
+        if (selectElement.value !== 'FAC') {
+            switch (sType) {
+                case 'Hosteller':
+                    barcodeInput.classList.add('hostel');
+                    barcodeInput.select();
+                    break;
+                case 'Lakshya Hosteller':
+                    barcodeInput.classList.add('laskshya');
+                    barcodeInput.select();
+                    break;
+                case 'Day Schollar':
+                    barcodeInput.classList.add('daySch');
+                    barcodeInput.select();
+                    break;
+                case 'Transport':
+                    barcodeInput.classList.add('transport');
+                    barcodeInput.select();
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            barcodeInput.classList.add('faculty');
+        } 
+    }
+
+    
+</script>

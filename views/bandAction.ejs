@@ -1,0 +1,244 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+    <style>
+        .input {
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .input_area {
+            padding: 20px;
+            padding-top: 0px;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #007bff;
+            background-color: #f4f6f9;
+        }
+
+        .actionArea {
+            display: flex;
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        .action-button {
+            text-decoration: none;
+            color: #4C6A92;
+            background: #f4f6f9;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .action-button:hover {
+            background: #e0e4e9;
+        }
+        
+        .action-button i {
+            font-size: 16px;
+        }
+    </style>
+
+    
+    <link rel="stylesheet" href="/CSS/sty.css">
+</head>
+
+<body>
+    <%- include('./include/sidebaar.ejs', {role: user_access_data.role, name: user_access_data.name, post: user_access_data.post}) %>
+
+    <div class="content">
+        <!-- Content box with rounded corners -->
+        <div class="content-box">
+            <!-- Box header with title and button -->
+            <div class="box-header">
+                <h2>Band Action</h2>
+            </div>
+
+
+            <div class="content-wrapper">
+                <!-- Input field container -->
+                <div class="input-container">
+                    <div class="input_area">
+                    <form action="/band/action" method="get">
+                        <input class="input" placeholder="Reg. No." id="reg_no" name="reg_no" value="<%= bandData.reg_no %>" type="text">
+                    </form>
+                    </div>
+            
+                    <%- include('./include/data.ejs', { bandData: bandData, show: "Yes", type: barcode_type }) %>
+
+                </div>
+
+                <!-- Image container -->
+                <div class="image-container">
+                    <img src="/<%=barcode_type === 'faculty_data' ? 'staff-' : barcode_type === 'guest_data' ? 'master-entry-' :''%>Images/<%=bandData.photo_path%>.jpg" alt="User Image"> <!-- Placeholder passport-size image -->
+                </div>
+            </div>
+            <!-- Include viewData.ejs to display data -->
+          
+            <div class="actionArea">
+                <a href="#" tabindex="8" id="openModalBtn" class="action-button">
+                    <i class="fas fa-eye"></i> View Activity
+                </a>
+                <a href="#" tabindex="9" class="action-button" id="actionButton" data-reg_no="<%= bandData.reg_no %>">
+                    <i class="fas <%= bandData.status === 'N' ? 'fa-check' : 'fa-ban' %>" id="actionIcon"></i> <%= bandData.status === 'N' ? 'Enable' : 'Disable' %>
+                </a>
+                
+                <% if (bandData.barcode) { %>
+                <a href="#" tabindex="10" class="action-button" id="revokeButton" data-reg_no="<%= bandData.reg_no %>">
+                    <i class="fas fa-exclamation-triangle"></i> Revoke
+                </a>
+                <% } %>
+            </div>
+        </div>
+
+        <%- include('./include/m_activity_model.ejs', {reg_no_s: bandData.reg_no, show: "Yes", user_name: user_access_data.name, user_post: user_access_data.post}) %>
+    </div>
+</body>
+<script>
+
+    document.getElementById('actionButton').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default anchor behavior
+    
+        const reg_no = this.getAttribute('data-reg_no');
+        const button = this;
+        const icon = document.getElementById('actionIcon');
+    
+        // Ask for confirmation before proceeding
+        const actionText = button.innerText.includes('Disable') ? 'disable' : 'enable';
+        const confirmation = confirm(`Are you sure you want to ${actionText} the band?`);
+    
+        if (!confirmation) {
+            return; // If user cancels, do nothing and exit the function
+        }
+    
+        // Ask for a reason after confirmation
+        const remark = prompt(`Please provide a remark for ${actionText} of this account.`);
+    
+        if (!remark) {
+            return; // If no reason is provided, cancel the action
+        }
+    
+        // URL encode the reg_no to safely pass it in the URL
+        const encodedRegNo = encodeURIComponent(reg_no);
+        console.log('Encoded reg_no:', encodedRegNo); // Check the encoded reg_no
+    
+        // Check the current text on the button to determine action (Disable or Enable)
+        if (button.innerText.includes('Disable')) {
+            // Disable the band (API call to disable)
+            fetch(`/band/action/disable/${encodedRegNo}`, {
+                method: 'PUT', // PUT for updating data
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ remark: remark }), // Send the reason in the request body
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Change button to "Enable" and icon to a checkmark
+                    button.innerHTML = '<i class="fas fa-check" id="actionIcon"></i> Enable'; // Change text to "Enable"
+                    icon.classList.replace('fa-ban', 'fa-check'); // Change icon from "ban" to "check"
+                } else {
+                    alert('Failed to disable band');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error disabling the band.');
+            });
+        } else {
+            // Enable the band (API call to enable)
+            fetch(`/band/action/enable/${encodedRegNo}`, {
+                method: 'PUT', // PUT for updating data
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ remark: remark }), // Send the reason in the request body
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Change button to "Disable" and icon to a ban
+                    button.innerHTML = '<i class="fas fa-ban" id="actionIcon"></i> Disable'; // Change text to "Disable"
+                    icon.classList.replace('fa-check', 'fa-ban'); // Change icon from "check" to "ban"
+                } else {
+                    alert('Failed to enable band');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error enabling the band.');
+            });
+        }
+    });
+    
+
+
+    document.getElementById('revokeButton').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default anchor behavior
+        
+        const reg_no = this.getAttribute('data-reg_no'); // Get the reg_no from the data attribute
+        const button = this;
+        
+        // Ask for confirmation before proceeding
+        const confirmation = confirm(`Are you sure you want to revoke band for this account.`);
+        
+        if (!confirmation) {
+            return; // If user cancels, do nothing and exit the function
+        }
+        
+        // Prompt for a remark from the user
+        const remark = prompt('Please provide a reason for the band revocation:');
+        
+        // If no remark is provided, do not proceed with the request
+        if (!remark || remark.trim() === '') {
+            return; // Exit the function if no remark is given
+        }
+        
+        // URL encode the reg_no to safely pass it in the URL
+        const encodedRegNo = encodeURIComponent(reg_no);
+        console.log('Encoded reg_no:', encodedRegNo); // Check the encoded reg_no
+        
+        // Send the revoke request to the server with the remark included
+        fetch(`/band/action/revoke/${encodedRegNo}`, {
+            method: 'PUT', // PUT to update data
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ remark }) // Send the remark in the request body
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // If the revocation was successful, update the UI or notify the user
+                alert('Band has been revoked successfully.');
+                
+                // Hide the revoke button
+                button.style.display = 'none';  // Hides the button after success
+                
+                // Optionally, you can disable it instead of hiding if you prefer to keep the UI element visible but inactive
+                // button.disabled = true;
+            } else {
+                alert('Failed to revoke the band.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('There was an error revoking the band.');
+        });
+    });
+    
+</script>
+
+<script src="/JS/m.js"></script>

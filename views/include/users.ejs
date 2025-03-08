@@ -1,0 +1,188 @@
+<head>
+    <style>
+        .role-select{
+            padding: 4px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<table id="userTable" class="usersData">
+    <thead>
+        <tr>
+            <th style="padding-left: 30px;">Name</th>
+            <th>Username</th>
+            <th>Post</th>
+            <th>Role</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% users.forEach(function(user) { %>
+            <tr>
+                <td style="padding-left: 30px;"><%= user.name %></td>
+                <td><%= user.username %></td>
+                <td><%= user.post %></td>
+                <td>
+                    <!-- Role select dropdown -->
+                    <select class="role-select" data-user-id="<%= user.username %>">
+                        <option value="Admin" <%= user.role === 'Admin' ? 'selected' : '' %>>Admin</option>
+                        <option value="User" <%= user.role === 'User' ? 'selected' : '' %>>User</option>
+                        <option value="InUser" <%= user.role === 'InUser' ? 'selected' : '' %>>InUser</option>
+                        <option value="OutUser" <%= user.role === 'OutUser' ? 'selected' : '' %>>OutUser</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="update-btn" 
+                        data-user-id="<%= user.username %>"
+                        data-name="<%= user.name %>"
+                        data-post="<%= user.post %>"
+                        data-username="<%= user.username %>"
+                        data-role="<%= user.role %>"
+                        onclick="openUpdateModal(this)">
+                        <i class="fas fa-edit"></i> Update
+                    </button>
+
+                    <button class="action-btn" data-user-id="<%= user.username %>" data-status="<%= user.status %>">
+                        <i class="fas <%= user.status === 'N' ? 'fa-toggle-on' : 'fa-toggle-off' %>"></i> 
+                        <%= user.status === 'N' ? 'Enable' : 'Disable' %>
+                    </button>
+
+                    <button class="delete-btn" data-user-id="<%= user.username %>">
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+
+                    <button 
+                        data-username="<%= user.username %>"
+                        data-master-id="<%= user.master_id %>"
+                        data-user-role="<%= user.role %>"
+                        onclick="openMasterForm(this)" 
+                        <%= user.role !== 'Admin' ? 'disabled' : '' %>>
+                        <i class="fas fa-id-card"></i>  
+                    </button>
+                
+                </td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
+
+
+<script>
+    // Handle action button click
+    document.querySelectorAll('.action-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const currentStatus = this.getAttribute('data-status');
+            const newStatus = currentStatus === 'N' ? 'Y' : 'N'; // Toggle between 'Y' and 'N'
+            
+            // Show confirmation dialog
+            const actionText = newStatus === 'N' ? 'Disable' : 'Enable';
+            const confirmMessage = `Are you sure you want to ${actionText} this user?`;
+            
+            if (confirm(confirmMessage)) {
+                // If the user confirms, send API request to change user status
+                fetch(`/users/action/${newStatus}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: userId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the button text and icon after successful update
+                        const actionButton = this;
+                        actionButton.innerHTML = `
+                            <i class="fas ${newStatus === 'Y' ? 'fa-toggle-off' : 'fa-toggle-on'}"></i> 
+                            ${newStatus === 'Y' ? 'Disable' : 'Enable'}
+                        `;
+                        actionButton.setAttribute('data-status', newStatus);
+                    } else {
+                        alert('Error updating user status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    });
+
+
+
+    // Handle delete button click
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            
+            // Show confirmation dialog
+            const confirmMessage = `Are you sure you want to delete this user?`;
+            
+            if (confirm(confirmMessage)) {
+                // If the user confirms, send API request to delete the user
+                fetch(`/users/action/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: userId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Find the row that contains this delete button and remove it from the table
+                        const row = this.closest('tr');
+                        row.remove();
+                    } else {
+                        alert('Error deleting user');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    });
+
+    // Handle role change
+    document.querySelectorAll('.role-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const userId = this.getAttribute('data-user-id');
+            const newRole = this.value;
+            // Show confirmation dialog before updating the role
+            const confirmMessage = `Are you sure you want to change the role of this user to ${newRole}?`;
+            
+            if (confirm(confirmMessage)) {
+
+                fetch('/users/action/update/role', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: userId, newRole: newRole }), // Send the userId and newRole
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('User role updated successfully!');
+                    } else {
+                        alert(data.message || 'Error updating user role');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                // Reset the select value to the previous role if canceled
+                this.value = this.getAttribute('data-current-role');
+            }
+        });
+
+        // Set initial role as the data-current-role attribute value
+        select.setAttribute('data-current-role', select.value);
+    });
+
+
+</script>

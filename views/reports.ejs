@@ -1,0 +1,1140 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+    <link rel="stylesheet" href="/CSS/style.css">
+
+    <style>
+        body{
+            background: linear-gradient(135deg, #f1f1f1, #a8c0ff);
+        }
+
+        .input{
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff; 
+            width: 200px;
+            margin-left: 50px;
+            font-size: 14px;
+            padding-left: 10px;
+        }
+
+        select{
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            width: 200px;
+            height: 32px;
+            font-size: 14px;
+            margin-left: 50px;
+        }
+
+        .input_area, .filterArea1, .filterArea2, .btnArea, .dateArea, .actionArea{
+            padding-left: 20px;
+        }
+
+        .input.first, .first{
+            margin-left: 0px;
+        }
+
+        .filterArea1, .filterArea2, .btnArea, .dateArea{
+            margin-top: 30px;
+        }
+
+        .btnArea{
+            margin-bottom: 20px;
+        }
+
+        .input:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+            background-color: #f4f6f9;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+  
+        .dropbtn {
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff; 
+            width: 200px;
+            margin-left: 50px;
+            font-size: 14px;
+            text-align: left;
+            padding-left: 10px;
+        }
+        
+        /* Dropdown content (hidden by default) */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            width: 200px;
+            border-radius: 10px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            margin-left: 50px;
+            max-height: 200px;
+            overflow: auto;
+        }
+
+        .dropdown-content label {
+            padding: 8px 16px;
+            display: block;
+            cursor: pointer;
+            font-size: 14px;
+        }
+  
+        .dropdown-content input {
+            margin-right: 10px;
+        }
+
+        .search-btn {
+            padding: 5px 18px;
+            background-color: #4C6A92;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-left: 50px;
+        }
+
+        .search-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .input.first, .first{
+            margin-left: 0px;
+        }
+
+        .actionArea {
+            display: flex;
+            justify-content: space-between; /* Distribute space between count and export area */
+            align-items: center;
+            padding: 10px;
+            
+            padding-left: 20px;
+        }
+
+        .exportArea {
+            display: flex;
+            align-items: center;
+        }
+
+        .actionItem {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 20px; /* Add space between links */
+        }
+        .actionItem.pdf{
+            margin-right: 20px;
+        }
+        .actionItem img {
+            width: 26px;
+            height: 22px;
+        }
+        .actionItem .pdf {
+            width: 22px;
+        }
+        .actionItem a {
+            font-size: 14px;
+            color: #0078d4;
+            text-decoration: none; /* No underline initially */
+            display: flex;
+            align-items: center;
+        }
+        .actionItem a:hover {
+            text-decoration: underline; /* Underline on hover */
+            color: #005a9e; /* Change text color on hover */
+        }
+        .count{
+            font-size: 15px;
+        }
+
+        .fetchtableArea {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #fff;
+            overflow: auto;
+            padding: 20px;
+            padding-top: 0px;
+            height: 100%;
+        }
+
+        .fetchtableArea.min{
+            max-height: 300px;
+        }
+
+        .fetchtableArea.max{
+            max-height: 500px;
+        }
+
+        .fetchTable {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .fetchTable thead {
+            position: sticky;
+            top: 0;
+            background-color: #e5e3e3;
+            color: #4C6A92;
+            font-size: 14px;
+        }
+
+        .fetchTable th, .fetchTable td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .fetchTable tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .fetchTable th {
+            font-weight: bold;
+        }
+
+        .fetchTable td {
+            color: #333;
+            font-size: 14px;
+        }
+
+        .fetchTable td:first-child, .fetchTable th:first-child {
+            width: 12%;
+            padding-left: 0px;
+        }
+
+        .fetchTable td:last-child, .fetchTable th:last-child {
+            width: 8%;
+        }
+
+        .searchArea{
+            padding-top: 20px;
+
+        }
+
+        #searchArea {
+            height: auto;  /* Initial height based on content */
+            position: relative;  /* Ensure the Modify Search button is positioned correctly */
+            transition: height 5s ease;  /* Slower transition for height */
+            margin-top: 0px;
+            margin-bottom: 15px;
+            padding-top: 20px;
+        }
+        
+        
+        #searchArea.collapsed {
+            height: 40px;  /* Collapse height to 15px */
+            padding: 0;  /* Remove padding when collapsed */
+        }
+        
+        #modifySearchBtn {
+            position: absolute;  /* Position the button absolutely within the search area */
+            top: 10px;  /* Distance from the top */
+            right: 20px;  /* Distance from the right edge of the search area */
+            display: block;
+            border: none;
+            font-size: 16px;
+            color: #0078d4;
+            text-decoration: none; /* No underline initially */
+            background-color: #fff;
+        } 
+
+        #header{
+            padding-bottom: 0px;
+        }
+    </style>
+</head> 
+
+<body>
+    <%- include('./include/sidebaar.ejs', {role: user_access_data.role, name: user_access_data.name, post: user_access_data.post}) %>
+
+    <div class="content">
+        <div class="content-box">
+            <div class="box-header" id="header">
+                <h2>Reports</h2>
+            </div>
+        
+            <div class="searchArea" id="searchArea">
+                <div class="searchContent" id="searchInnerArea">
+                    <div class="input_area">
+                        <select class="starting_ele first" name="" id="first">
+                            <option value="#" disabled selected>Select Report</option>
+                            <option value="student">Student Report</option>
+                            <option value="FAC">Staff Report</option>
+                        </select>
+                    
+                        <select name="" id="second">
+                            <option value="">Select Report Type</option>
+                            <option value="band">Band Report</option>
+                            <option value="entry">Entry Report</option>
+                            <option value="activity">Activity Report</option>
+                        </select>
+                    
+
+                        <select name="" id="third">
+                        </select>
+
+                        <select name="" id="forth">
+                            <option value="" selected disabled>Select Type</option>
+                            <option value="day">Day Scholar</option>
+                            <option value="cam_host">Campus Hosteller</option>
+                            <option value="oth_host">Non-Campus Hosteller</option>
+                            <option value="lakshya">Lakshya Hosteller</option>
+                            <option value="transport">Transport</option>
+                        </select>
+                    </div>
+                    
+                    <div class="dateArea">
+                        <select id="dateSelector" class="first">
+                            <option value="" selected disabled>Select Date</option>
+                            <option value="today">Today</option>
+                            <option value="range">Range</option>
+                        </select>
+                        
+                        <input type="datetime-local" id="startDate" class="input">
+                        <input type="datetime-local" id="endDate" class="input">
+
+                        <select name="" id="fifth">
+                            <option value="" selected disabled>Select Site</option>
+                            <option value="PU">PU-Campus</option>
+                            <option value="PIET">PIET-Campus</option>
+                            <option value="PCE">PCE-Campus</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filterArea2" style="display: none;">
+                        <div class="dropdown">
+                            <button class="dropbtn first">Choose School</button>
+                            <div class="dropdown-content first school">
+                            </div>
+                        </div>
+                    
+                        <div class="dropdown">
+                            <button class="dropbtn">Choose Program</button>
+                            <div class="dropdown-content program">
+                            </div>
+                        </div>
+                    
+                        <div class="dropdown">
+                            <button class="dropbtn">Choose Semester</button>
+                            <div class="dropdown-content semester">
+                            </div>
+                        </div>
+                    
+                        <div class="dropdown">
+                            <button class="dropbtn">Choose Section</button>
+                            <div class="dropdown-content section">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filterArea1">
+                        <input type="text" class="input first" id="reg_no_input" placeholder="Registration No.">
+                        <input type="text" class="input" id="barcode_no_input" placeholder="Barcode No.">
+                        <input type="text" class="input" id="name_input" placeholder="Student Name">
+
+
+                        <select name="" id="distinctValue">
+                            <option value="" selected disabled>Select User Count</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+
+                        <button id="searchBtn" class="search-btn">Search</button>
+                    </div>
+
+                    <div class="btnArea">
+                        <button class="search-btn first" style="display: none;" id="updateBtn">Mark Student Exit</button>
+                    </div>
+                </div>
+
+
+                <button id="modifySearchBtn" style="display: none;"><i class="fas fa-edit"></i> &nbsp;Modify Search</button>
+            </div>
+
+            <div class="actionArea">
+                <div class="count">
+                    Total count : 140 records found.
+                </div>
+                <div class="exportArea">
+                    <div class="actionItem" onclick="exportTableToCSV()"">
+                        <img src="/Images/excel_logo.png" class="excel" alt="Excel Logo">
+                        <a href="#">Export to .xlsm</a>
+                    </div>
+                
+                        <!-- PDF Export Link -->
+                    <div class="actionItem pdf">
+                        <img src="/Images/pdf_logo.png" class="pdf" alt="PDF Logo">
+                        <a href="#">Export to .pdf</a>
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="fetchtableArea" id="fetchtableArea">
+                <table id="fetchTable" class="fetchTable">
+                    <thead>
+                
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+
+    </div>
+
+</body>
+
+<script>
+
+    const dateSelector = document.getElementById('dateSelector');
+    const startDateS = document.getElementById('startDate');
+    const endDateS = document.getElementById('endDate');
+
+
+    function toggleDateInputs() {
+        const today = new Date();
+        const currentDate = today.toLocaleDateString('en-CA'); 
+        const startOfDay = `${currentDate}T00:00`; // Set the start of the day (00:00)
+        const endOfDay = `${currentDate}T23:59`; // Set the end of the day (23:59)
+    
+        if (dateSelector.value === 'today') {
+            startDate.disabled = true;
+            endDate.disabled = true;
+            startDate.style.backgroundColor = 'rgb(230, 239, 239)';
+            endDate.style.backgroundColor = 'rgb(230, 239, 239)';
+            
+            // Set the current date as the value for the date inputs
+            startDate.value = startOfDay;
+            endDate.value = endOfDay;
+        } else {
+            startDate.disabled = false;
+            endDate.disabled = false;
+            startDate.style.backgroundColor = '';
+            endDate.style.backgroundColor = '';
+            
+            // Clear the values if not 'today'
+            startDate.value = '';
+            endDate.value = '';
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelector('.fetchTable').style.visibility = 'hidden';
+        document.querySelector('.actionArea').style.visibility = 'hidden';
+        document.querySelector('.actionArea .exportArea').style.visibility = 'hidden';
+
+        // Event listener for date selector change
+        dateSelector.addEventListener('change', toggleDateInputs);
+    
+        toggleDateInputs();
+    });
+    
+    
+    document.getElementById('third').style.display = 'none';
+    document.querySelector('.filterArea2').style.display = 'none';
+
+    document.getElementById('first').addEventListener('change', function() {
+        var firstSelect = document.getElementById('first');
+        var filterAreaS = document.querySelector('.filterArea2');
+
+        var regInput = document.getElementById('reg_no_input');
+        var barcodeInput = document.getElementById('barcode_no_input');
+        var nameInput = document.getElementById('name_input');
+
+        if (firstSelect.value === 'student') {
+            filterAreaS.style.display = 'block';
+            regInput.placeholder = 'Registration No.';
+            barcodeInput.placeholder = 'Barcode No.';
+            nameInput.placeholder = 'Student Name';
+
+        } else if (firstSelect.value === 'FAC') {
+            filterAreaS.style.display = 'none';
+            regInput.placeholder = "Employee I'd";
+            barcodeInput.placeholder = 'Barcode No.';
+            nameInput.placeholder = 'Staff Name';
+        }
+
+    });
+
+    document.getElementById('second').addEventListener('change', function() {
+        dateSelector.value = '';
+        var secondSelect = document.getElementById('second');
+        var thirdSelect = document.getElementById('third');
+        var dateArea = document.querySelector('.dateArea');
+        
+
+        thirdSelect.innerHTML = '';
+    
+        if (secondSelect.value === "band") {
+            thirdSelect.innerHTML += '<option Disabled Selected value="">Select Status</option>';
+            thirdSelect.innerHTML += '<option value="issued">Issued</option>';
+            thirdSelect.innerHTML += '<option value="pending">Pending</option>';
+            thirdSelect.innerHTML += '<option value="disabled">Disabled</option>';
+            thirdSelect.innerHTML += '<option value="revoked">Revoked</option>';
+
+            dateSelector.value = '';
+            dateSelector.disabled = true;
+            startDate.value = '';
+            endDate.value = '';
+            startDate.disabled = true;
+            endDate.disabled = true;
+
+            thirdSelect.style.display = 'inline';
+
+        } else if (secondSelect.value === "entry") {
+            thirdSelect.innerHTML += '<option Disabled Selected value="">Select Type</option>';
+            thirdSelect.innerHTML += '<option value="in">Only Entered</option>';
+            thirdSelect.innerHTML += '<option value="out">Only Exited</option>';
+            thirdSelect.innerHTML += '<option value="both">Entry & Exit Both</option>';
+            thirdSelect.innerHTML += '<option value="outPending">Exit Pending</option>';
+
+            dateSelector.disabled = false;
+            dateSelector.value = 'today';
+            toggleDateInputs();
+
+            thirdSelect.style.display = 'inline';
+
+        } else if (secondSelect.value === "activity") {
+            thirdSelect.innerHTML += '<option Disabled Selected value="">Select Activity</option>';
+            thirdSelect.innerHTML += '<option value="misc">Miscellaneous</option>';
+            thirdSelect.innerHTML += '<option value="enable">Enable</option>';
+            thirdSelect.innerHTML += '<option value="disable">Disable</option>';
+            thirdSelect.innerHTML += '<option value="Revoke">Revoke</option>';
+
+            dateSelector.value = 'today';
+            toggleDateInputs();
+
+            thirdSelect.style.display = 'inline';
+        }
+    });
+    
+
+    document.getElementById('searchBtn').addEventListener('click', function() {
+        if (document.getElementById('second').value === 'activity' && document.getElementById('second').value === 'entry') {
+
+            if (!dateSelector.value) {
+                alert('Please select a date option.');
+                dateSelector.focus();
+                return;
+            }
+    
+            if (dateSelector.value === 'range' && !startDateS.value) {
+                alert('Please select a start date.');
+                startDateS.focus();
+                return;
+            }
+            
+            if (dateSelector.value === 'range' && !endDateS.value) {
+                alert('Please select an end date.');
+                endDateS.focus();
+                return;
+            }    
+        }
+
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        const selectFirst = document.getElementById('first').value
+        const selectSecond = document.getElementById('second').value
+        const selectThird = document.getElementById('third').value
+        const selectForth = document.getElementById('forth').value
+        const selectFifth = document.getElementById('fifth').value
+
+        const selectDistinct = document.getElementById('distinctValue').value
+
+        const regNo = document.getElementById('reg_no_input').value;
+        const barcodeNo = document.getElementById('barcode_no_input').value;
+        const studentName = document.getElementById('name_input').value;
+    
+        let school;
+        let program;
+        let semester;
+        let section;
+        let params;
+
+        if (selectFirst == 'student') {
+            school = getSelectedValues('.dropdown-content.school');  // School dropdown
+            program = getSelectedValues('.dropdown-content.program'); // Program dropdown
+            semester = getSelectedValues('.dropdown-content.semester'); // Semester dropdown
+            section = getSelectedValues('.dropdown-content.section'); // Section dropdown
+
+            params = {
+                regNo: regNo,
+                barcodeNo: barcodeNo,
+                studentName: studentName,
+                school: school.join(','), // Joining selected values with commas
+                program: program.join(','),
+                semester: semester.join(','),
+                section: section.join(','),
+                first: selectFirst,
+                second: selectSecond,
+                third: selectThird,
+                type: selectForth,
+                startDate: startDate,
+                endDate: endDate,
+                site: selectFifth,
+                userCount: selectDistinct
+            };
+    
+        } else {
+
+            params = {
+                regNo: regNo,
+                barcodeNo: barcodeNo,
+                studentName: studentName,
+                school: '', // Joining selected values with commas
+                program: '',
+                semester: '',
+                section: '',
+                first: selectFirst,
+                second: selectSecond,
+                third: selectThird,
+                type: selectForth,
+                startDate: startDate,
+                endDate: endDate,
+                site: selectFifth,
+                userCount: selectDistinct
+            };
+        }
+
+
+        fetch(`/reports/fetch/data?${new URLSearchParams(params)}`)
+        .then(response => response.json())
+        .then(data => {
+            // Update the table with the data
+            updateTable(data, selectFirst, selectSecond, selectThird, selectForth);
+    
+            // Get the count of the data
+            const dataCount = data.length;
+    
+            // Update the count in the UI
+            const countElement = document.querySelector('.actionArea .count');
+            countElement.textContent = `Total count: ${dataCount} records found.`;
+    
+            // Show the action area
+            document.querySelector('.actionArea').style.visibility = 'visible';
+    
+            // If dataCount is greater than 0, show the export area
+            if (dataCount > 0) {
+                document.querySelector('.actionArea .exportArea').style.visibility = 'visible';
+
+                document.getElementById('searchArea').classList.add('collapsed');
+
+                document.getElementById('searchInnerArea').style.display = 'none';
+                // Show the 'Modify Search' button inside the search area
+                document.getElementById('modifySearchBtn').style.display = 'block';
+                
+                document.getElementById('fetchtableArea').classList.remove('min');
+                document.getElementById('fetchtableArea').classList.add('max');
+                
+            } else {
+                document.querySelector('.actionArea .exportArea').style.visibility = 'hidden';
+            }
+    
+            // Make the table visible
+            document.querySelector('.fetchTable').style.visibility = 'visible';
+        })
+        .catch(error => console.error('Error:', error));
+    
+    });
+    
+    // Function to get selected checkbox values for each dropdown
+    function getSelectedValues(selector) {
+        const checkboxes = document.querySelectorAll(`${selector} input:checked`);
+        const selectedValues = Array.from(checkboxes).map(checkbox => checkbox.parentElement.innerText.trim());
+        return selectedValues;
+    }
+    
+    // Function to update the table with data
+    function updateTable(data, selectFirst, selectSecond, selectThird ,selectForth) {
+        const tableBody = document.querySelector('.fetchTable tbody');
+        const tableHead = document.querySelector('.fetchTable thead');
+        tableHead.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        if (selectFirst === 'student' && selectFirst) {
+            if (selectThird === '' || selectThird === 'issued' || selectThird === 'pending') {
+                if (selectThird === 'pending') {
+                    tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Reg No</th>
+                        <th>Name</th>
+                        <th>School</th>
+                        <th>Program</th>
+                        <th>Semester</th>
+                        <th>Mobile</th>
+                        <th>Site</th>
+                        <th>Type</th>
+                        <th>Section</th>
+                    </tr>
+                    `;
+                } else {
+                    tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Reg No</th>
+                        <th>Barcode</th>
+                        <th>Issue User</th>
+                        <th>Name</th>
+                        <th>School</th>
+                        <th>Program</th>
+                        <th>Semester</th>
+                        <th>Mobile</th>
+                        <th>Site</th>
+                        <th>Type</th>
+                        <th>Section</th>
+                    </tr>
+                    `;
+                }
+
+            } else if (selectThird === 'revoked' || selectThird === 'disabled') {
+                tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Reg No</th>
+                        <th>Barcode No.</th>
+                        <th>Name</th>
+                        <th>School</th>
+                        <th>Program</th>
+                        <th>Semester</th>
+                        <th>Section</th>
+                        <th>Mobile</th>
+                        <th>Site</th>
+                        <th>Type</th>
+                        <th>Remark</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Post</th>
+                    </tr>
+                `;
+            } else if (selectThird === 'in' || selectThird === 'out' || selectThird === 'outPending') {
+                tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Reg No</th>
+                        <th>Name</th>
+                        <th>School</th>
+                        <th>Program</th>
+                        <th>Semester</th>
+                        <th>Section</th>
+                        <th>Mobile</th>
+                        <th>Site</th>
+                        <th>Type</th>
+                        <th>User</th>
+                        <th>Date ${selectThird === 'outPending' ? 'in' : selectThird}</th>
+                        <th>Time ${selectThird === 'outPending' ? 'in' : selectThird}</th>
+                    </tr>
+                 `;
+            } else if (selectThird === 'both') {
+                tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Reg No</th>
+                        <th>Name</th>
+                        <th>School</th>
+                        <th>Program</th>
+                        <th>Semester</th>
+                        <th>Section</th>
+                        <th>Mobile</th>
+                        <th>Site</th>
+                        <th>Type</th>
+                        <th>User In</th>
+                        <th>Date In</th>
+                        <th>Time In</th>
+                        <th>User Out</th>
+                        <th>Date Out</th>
+                        <th>Time Out</th>
+                    </tr>
+                `;
+            }
+
+        } else if (selectFirst === 'FAC' && selectFirst) {
+            if (selectThird === '' || selectThird === 'issued' || selectThird === 'pending') {
+                if (selectThird === 'pending') {
+                    tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Employee I'd</th>
+                        <th>Name</th>
+                        <th>Site</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                    </tr>
+                    `;
+                } else {
+                    tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Employee I'd</th>
+                        <th>Barcode</th>
+                        <th>Issue User</th>
+                        <th>Name</th>
+                        <th>Site</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                    </tr>
+                    `;
+                }
+            } else if (selectThird === 'revoked' || selectThird === 'disabled') {
+                tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Employee I'd</th>
+                        <th>Barcode No.</th>
+                        <th>Name</th>
+                        <th>Site</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                        <th>Remark</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Post</th>
+                    </tr>
+                `;
+            } else if (selectThird === 'in' || selectThird === 'out' || selectThird === 'outPending') {
+                tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Employee I'd</th>
+                        <th>Name</th>
+                        <th>Site</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                        <th>User</th>
+                        <th>Date ${selectThird === 'outPending' ? 'in' : selectThird}</th>
+                        <th>Time ${selectThird === 'outPending' ? 'in' : selectThird}</th>
+                    </tr>
+                `;
+            } else if (selectThird === 'both') {
+                tableHead.innerHTML = `
+                    <tr>
+                        <th style="padding-left: 25px;">Employee I'd</th>
+                        <th>Name</th>
+                        <th>Site</th>
+                        <th>Email</th>
+                        <th>User In</th>
+                        <th>Date In</th>
+                        <th>Time In</th>
+                        <th>User Out</th>
+                        <th>Date Out</th>
+                        <th>Time Out</th>
+                    </tr>
+                `;
+            }
+        }
+
+
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            
+            if (selectFirst === 'student' && selectFirst) {
+                if (selectThird === '' || selectThird === 'issued' || selectThird === 'pending') {
+                    if (selectThird === 'pending') {
+                        tr.innerHTML = `
+                            <td style="padding-left: 25px;">${row.reg_no}</td>
+                            <td>${row.name}</td>
+                            <td>${row.school}</td>
+                            <td>${row.program}</td>
+                            <td>${row.sem}</td>
+                            <td>${row.mobile}</td>
+                            <td>${row.site}</td>
+                            <td>
+                            ${row.type} 
+                            ${row.type === 'Hosteller' || row.type === 'Lakshya Hosteller' ? `(${row.hostel})` : ''}
+                            </td>
+                            <td>${row.section}</td>
+                        `;
+                    } else {
+                        tr.innerHTML = `
+                            <td style="padding-left: 25px;">${row.reg_no}</td>
+                            <td style="text-transform: uppercase;">${row.barcode ? row.barcode : 'N/A'}</td>
+                            <td>${row.user ? row.user : 'N/A'}</td>
+                            <td>${row.name}</td>
+                            <td>${row.school}</td>
+                            <td>${row.program}</td>
+                            <td>${row.sem}</td>
+                            <td>${row.mobile}</td>
+                            <td>${row.site}</td>
+                            <td>
+                            ${row.type} 
+                            ${row.type === 'Hosteller' || row.type === 'Lakshya Hosteller' ? `(${row.hostel})` : ''}
+                            </td>
+                            <td>${row.section}</td>
+                        `;
+                    }
+                } else if (selectThird === 'revoked' || selectThird === 'disabled') {
+                    let dateObj = new Date(row.date_time);
+                    let dateFormatted = `${dateObj.getDate().toString().padStart(2, '0')}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getFullYear()}`;
+                    let timeFormatted = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}:${dateObj.getSeconds().toString().padStart(2, '0')}`;
+    
+                    let code;
+
+                    if (selectThird === 'revoked') {
+                        code = row.remark.slice(8, 15);  // First 7 characters
+                        remark = row.remark.slice(15).trim();
+                    } else {
+                        code = row.barcode;
+                        remark = row.remark.slice(9).trim();
+                    }
+                    
+    
+                    tr.innerHTML = `
+                        <td style="padding-left: 25px;">${row.reg_no}</td>
+                        <td style="text-transform: uppercase;">${code}</td>
+                        <td>${row.name}</td>
+                        <td>${row.school}</td>
+                        <td>${row.program}</td>
+                        <td>${row.sem}</td>
+                        <td>${row.section}</td>
+                        <td>${row.mobile}</td>
+                        <td>${row.site}</td>
+                        <td>
+                        ${row.type} 
+                        ${row.type === 'Hosteller' || row.type === 'Lakshya Hosteller' ? `(${row.hostel})` : ''}
+                        </td>
+                        <td>${remark}</td>
+                        <td>${dateFormatted}</td>
+                        <td>${timeFormatted}</td>
+                        <td>${row.user}</td>
+                        <td>${row.post}</td>
+                    `;
+                } else if (selectThird === 'in' || selectThird === 'out' || selectThird === 'outPending') {
+                    let dateObj;
+                    let dateFormatted;
+                    let timeFormatted
+
+                    if (row.date_time) {
+                        dateObj = new Date(row.date_time);
+                        dateFormatted = `${dateObj.getDate().toString().padStart(2, '0')}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getFullYear()}`;
+                        timeFormatted = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}:${dateObj.getSeconds().toString().padStart(2, '0')}`;
+                    } else {
+                        dateFormatted = 'N/A';
+                        timeFormatted = 'N/A';
+                    }
+                    tr.innerHTML = `
+                        <td style="padding-left: 25px;">${row.reg_no}</td>
+                        <td>${row.name}</td>
+                        <td>${row.school}</td>
+                        <td>${row.program}</td>
+                        <td>${row.sem}</td>
+                        <td>${row.section}</td>
+                        <td>${row.mobile}</td>
+                        <td>${row.site}</td>
+                        <td>
+                        ${row.type} 
+                        ${row.type === 'Hosteller' || row.type === 'Lakshya Hosteller' ? `(${row.hostel})` : ''}
+                        </td>
+                        <td>${row.user ? row.user : 'N/A'}</td>
+                        <td>${dateFormatted}</td>
+                        <td>${timeFormatted}</td>
+                    `;
+                } else if (selectThird === 'both') {
+                    let dateFormattedIn;
+                    let timeFormattedIn;
+
+                    let dateFormattedOut
+                    let timeFormattedOut
+                    
+                    if (row.date_time_in) {
+                        let dateObjIn = new Date(row.date_time_in);
+                        dateFormattedIn = `${dateObjIn.getDate().toString().padStart(2, '0')}-${(dateObjIn.getMonth() + 1).toString().padStart(2, '0')}-${dateObjIn.getFullYear()}`;
+                        timeFormattedIn = `${dateObjIn.getHours().toString().padStart(2, '0')}:${dateObjIn.getMinutes().toString().padStart(2, '0')}:${dateObjIn.getSeconds().toString().padStart(2, '0')}`;
+                    } else {
+                        dateFormattedIn = 'N/A'
+                        timeFormattedIn = 'N/A';
+                    }
+                    
+                    if (row.date_time_out) {
+                        let dateObjOut = new Date(row.date_time_out);
+                        dateFormattedOut = `${dateObjOut.getDate().toString().padStart(2, '0')}-${(dateObjOut.getMonth() + 1).toString().padStart(2, '0')}-${dateObjOut.getFullYear()}`;
+                        timeFormattedOut = `${dateObjOut.getHours().toString().padStart(2, '0')}:${dateObjOut.getMinutes().toString().padStart(2, '0')}:${dateObjOut.getSeconds().toString().padStart(2, '0')}`;
+                    } else {
+                        dateFormattedOut = 'N/A'
+                        timeFormattedOut = 'N/A';
+                    }
+
+                    tr.innerHTML = `
+                        <td style="padding-left: 25px;">${row.reg_no}</td>
+                        <td>${row.name}</td>
+                        <td>${row.school}</td>
+                        <td>${row.program}</td>
+                        <td>${row.sem}</td>
+                        <td>${row.section}</td>
+                        <td>${row.mobile}</td>
+                        <td>${row.site}</td>
+                        <td>
+                        ${row.type} 
+                        ${row.type === 'Hosteller' || row.type === 'Lakshya Hosteller' ? `(${row.hostel})` : ''}
+                        </td>
+                        <td>${row.user_in}</td>
+                        <td>${dateFormattedIn}</td>
+                        <td>${timeFormattedIn}</td>
+                        <td>${row.user_out ? row.user_out : 'N/A'}</td>
+                        <td>${dateFormattedOut}</td>
+                        <td>${timeFormattedOut}</td>
+                    `;
+                }
+            } else if (selectFirst === 'FAC' && selectFirst) {
+                if (selectThird === '' || selectThird === 'issued' || selectThird === 'pending') {
+                    if (selectThird === 'pending') {
+                        tr.innerHTML = `
+                            <td style="padding-left: 25px;">${row.reg_no}</td>
+                            <td>${row.name}</td>
+                            <td>${row.site}</td>
+                            <td>${row.email}</td>
+                            <td>${row.mobile}</td>
+                        `;
+                    } else {
+                        tr.innerHTML = `
+                            <td style="padding-left: 25px;">${row.reg_no}</td>
+                            <td style="text-transform: uppercase;">${row.barcode ? row.barcode : 'N/A'}</td>
+                            <td>${row.user ? row.user : 'N/A'}</td>
+                            <td>${row.name}</td>
+                            <td>${row.site}</td>
+                            <td>${row.email}</td>
+                            <td>${row.mobile}</td>
+                        `;
+                    }
+                } else if (selectThird === 'revoked' || selectThird === 'disabled') {
+                    let dateObj = new Date(row.date_time);
+                    let dateFormatted = `${dateObj.getDate().toString().padStart(2, '0')}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getFullYear()}`;
+                    let timeFormatted = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}:${dateObj.getSeconds().toString().padStart(2, '0')}`;
+    
+    
+                    let code;
+                    if (selectThird === 'revoked') {
+                        code = row.remark.slice(8, 15);  // First 7 characters
+                        remark = row.remark.slice(15).trim();
+                    } else {
+                        code = row.barcode;
+                        remark = row.remark.slice(9).trim();
+                    }
+                    
+                    tr.innerHTML = `
+                        <td style="padding-left: 25px;">${row.reg_no}</td>
+                        <td style="text-transform: uppercase;">${reg_no}</td>
+                        <td>${row.name}</td>
+                        <td>${row.site}</td>
+                        <td>${row.email}</td>
+                        <td>${row.mobile}</td>
+                        <td>${remark}</td>
+                        <td>${dateFormatted}</td>
+                        <td>${timeFormatted}</td>
+                        <td>${row.user}</td>
+                        <td>${row.post}</td>
+                    `;
+                } else if (selectThird === 'in' || selectThird === 'out' || selectThird === 'outPending') {
+                    let dateFormatted;
+                    let timeFormatted
+
+                    if (row.date_time) {
+                        let dateObj = new Date(row.date_time);
+                        dateFormatted = `${dateObj.getDate().toString().padStart(2, '0')}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getFullYear()}`;
+                        timeFormatted = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}:${dateObj.getSeconds().toString().padStart(2, '0')}`;
+                    } else {
+                        dateFormatted = 'N/A';
+                        timeFormatted = 'N/A';
+                    }
+
+                    tr.innerHTML = `
+                        <td style="padding-left: 25px;">${row.reg_no}</td>
+                        <td>${row.name}</td>
+                        <td>${row.site}</td>
+                        <td>${row.email}</td>
+                        <td>${row.mobile}</td>
+                        <td>${row.user ? row.user : ''}</td>
+                        <td>${dateFormatted}</td>
+                        <td>${timeFormatted}</td>
+                    `;
+                } else if (selectThird === 'both') {
+                    let dateFormattedIn
+                    let timeFormattedIn 
+
+                    if (row.date_time_in) {
+                        let dateObjIn = new Date(row.date_time_in);
+                        dateFormattedIn = `${dateObjIn.getDate().toString().padStart(2, '0')}-${(dateObjIn.getMonth() + 1).toString().padStart(2, '0')}-${dateObjIn.getFullYear()}`;
+                        timeFormattedIn = `${dateObjIn.getHours().toString().padStart(2, '0')}:${dateObjIn.getMinutes().toString().padStart(2, '0')}:${dateObjIn.getSeconds().toString().padStart(2, '0')}`;
+                    } else {
+                        dateFormattedIn = 'N/A';
+                        timeFormattedIn = 'N/A';
+                    }
+
+                    if (row.date_time_out) {
+                        let dateObjOut = new Date(row.date_time_out);
+                        dateFormattedOut = `${dateObjOut.getDate().toString().padStart(2, '0')}-${(dateObjOut.getMonth() + 1).toString().padStart(2, '0')}-${dateObjOut.getFullYear()}`;
+                        timeFormattedOut = `${dateObjOut.getHours().toString().padStart(2, '0')}:${dateObjOut.getMinutes().toString().padStart(2, '0')}:${dateObjOut.getSeconds().toString().padStart(2, '0')}`;
+                    } else {
+                        dateFormattedOut = 'N/A';
+                        timeFormattedOut = 'N/A';
+                    }
+                    
+
+                    tr.innerHTML = `
+                        <td style="padding-left: 25px;">${row.reg_no}</td>
+                        <td>${row.name}</td>
+                        <td>${row.site}</td>
+                        <td>${row.email}</td>
+                        <td>${row.user_in}</td>
+                        <td>${dateFormattedIn}</td>
+                        <td>${timeFormattedIn}</td>
+                        <td>${row.user_out ? row.user_out : 'N/A'}</td>
+                        <td>${dateFormattedOut}</td>
+                        <td>${timeFormattedOut}</td>
+                    `;
+                }
+            }
+
+            tableBody.appendChild(tr);
+        });
+    }
+
+
+    function exportTableToCSV() {
+        var table = document.getElementById('fetchTable');
+        var rows = table.rows;
+        var csvContent = "";
+        
+        // Loop through the table rows
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var cols = row.querySelectorAll("td, th");
+    
+            // Loop through each column in the row
+            var rowData = [];
+            for (var j = 0; j < cols.length; j++) {
+                rowData.push(cols[j].innerText);
+            }
+    
+            // Join the row data with commas
+            csvContent += rowData.join(",") + "\n";
+        }
+    
+        // Create a downloadable CSV file
+        var blob = new Blob([csvContent], { type: 'text/csv' });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "report.csv";
+        link.click();
+    }
+    
+</script>
+
+
+<script src="/JS/filter.js"></script>

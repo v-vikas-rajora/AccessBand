@@ -1,0 +1,362 @@
+<style>
+div#myModal button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+div#myModal button:hover {
+    background-color: #45a049;
+}
+
+/* Modal styles */
+div#myModal .modal-content {
+    background-color: #fefefe;
+    margin: 2% auto;
+    padding: 40px;
+    border: 1px solid #888;
+    width: 80%;
+    position: relative;
+    height: 60%;
+    overflow-y: auto;
+}
+
+/* Button area styles */
+div#myModal .btn_area {
+    margin-top: 20px;
+    width: 100%;
+    text-align: right;
+}
+
+div#myModal .new-btn {
+    padding: 8px 18px;
+    background-color: #4C6A92;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+div#myModal .new-btn:hover {
+    background-color: #007BBE;
+    transform: scale(1.05);
+}
+
+/* Input area styles */
+div#myModal .input_area {
+    width: 100%;
+    text-align: left;
+    margin-top: 10px; /* Adjust spacing for visual balance */
+}
+
+div#myModal .input_remark {
+    width: 615px;
+    margin-right: 10px;
+}
+
+div#myModal .input_remark {
+    height: 40px;
+    padding-left: 10px;
+    border-radius: 5px;
+    outline: none;
+    border: 2px solid gray;
+}
+
+div#myModal .input_remark.user,
+div#myModal .input_remark.post {
+    width: 300px !important;
+}
+
+div#myModal .input_remark.remark {
+    margin-top: 10px;
+}
+
+div#myModal .submit-btnn {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+div#myModal .submit-btnn:hover {
+    background-color: #45a049;
+}
+
+/* Table area styles */
+div#myModal .tableAreaa {
+    margin-top: 20px;
+    height: 70%;
+    overflow: auto;
+}
+
+/* Table styles */
+div#myModal .entryDataa {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    overflow: auto;
+}
+
+div#myModal .entryDataa th,
+div#myModal .entryDataa td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+div#myModal .entryDataa th {
+    background-color: #f2f2f2;
+}
+
+/* Center align Date and Time columns */
+div#myModal .entryDataa td:first-child,
+div#myModal .entryDataa th:first-child {
+    width: 150px; /* Adjust as per your requirement */
+    text-align: center; /* Center-align the Date column */
+}
+
+div#myModal .entryDataa td:nth-child(2),
+div#myModal .entryDataa th:nth-child(2) {
+    width: 120px; /* Adjust as per your requirement */
+    text-align: center; /* Center-align the Time column */
+}
+
+/* Close button */
+div#myModal .close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 40px;
+    transition: 0.3s;
+}
+
+div#myModal .close:hover,
+div#myModal .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+/* Overlay background for modal */
+div#myModal {
+    display: none;  /* Ensure the modal is hidden initially */
+    position: fixed;  /* Position it fixed on the screen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Light black color (semi-transparent) */
+    z-index: 1000; /* Ensure it's on top of other content */
+}
+
+/* Modal content container */
+div#myModal .modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 40px;
+    border: 1px solid #888;
+    width: 80%;
+    height: 60%;
+    overflow-y: auto;
+}
+
+    
+</style>
+
+
+<div id="myModal" class="modal misc_model">
+    <div class="modal-content">
+        <!-- Close Button -->
+        <span class="close" onclick="closeModel()">&times;</span>
+        
+        <% if (show === 'Yes') { %>
+        <div class="btn_area">
+            <button id="raiseActivityBtn" class="new-btn">Raise Activity</button>
+        </div>
+
+        <div class="input_area">
+            <input type="hidden" name="reg_no" id="reg_no_sss" value="">
+            
+            <input type="hidden" id="userInput" class="input_remark user" value="<%=user_name%>" placeholder="Enter Your Name">
+            <input type="hidden" id="postInput" class="input_remark post" value="<%=user_post%>" placeholder="Enter Your Designation">
+            
+            <!-- Remark input field -->
+            <input type="text" id="remarkTextBox" class="input_remark remark" placeholder="Enter activity details" style="display:none;">
+            
+            <button class="submit-btnn" style="display:none;" id="submitBtn">Submit</button>
+        </div>
+        <% } %>
+
+        <div class="tableAreaa">
+            <table class="entryDataa">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Post</th>
+                        <th>Remark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get modal and elements
+    // Get modal and elements
+    var modalA = document.querySelector(".misc_model");
+    var openModalBtnA = document.getElementById("openModalBtn");
+    var closeBtn = document.getElementsByClassName("close")[0];
+    var raiseActivityBtn = document.getElementById("raiseActivityBtn");
+    var remarkTextBox = document.getElementById("remarkTextBox");
+    var submitBtn = document.getElementById("submitBtn");
+    var regNoInput = document.getElementById('reg_no'); // Get the hidden input field for reg_no
+
+    // Get the table body where rows are inserted
+    var tableBody = document.querySelector(".aaaaaaaaa tbody");
+
+    // Open the modal
+    openModalBtnA.onclick = function() {
+        alert('ss');
+        modalA.style.display = "block";
+    }
+
+    // Close the modal
+    closeBtn.onclick = function() {
+        modalA.style.display = "none";
+    }
+
+
+    // Close the modal if the user clicks anywhere outside the modal
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modalA.style.display = "none";
+        }
+    }
+
+    // Show the remark text box and focus on it when Raise Activity button is clicked
+    // Show the input fields for User, Post, and Remark when Raise Activity button is clicked
+// Show the input fields for User, Post, and Remark when Raise Activity button is clicked
+// Show the input fields for User, Post, and Remark when Raise Activity button is clicked
+raiseActivityBtn.onclick = function() {
+    remarkTextBox.style.display = "inline-block"; // Show the remark text box
+    submitBtn.style.display = "inline-block"; // Show the submit button
+    remarkTextBox.focus();
+}
+
+// Submit the remark when Submit button is clicked
+submitBtn.onclick = function() {
+    // Get the values entered by the ;
+    var user = userInput.value;
+    var post = postInput.value;
+    var remark = remarkTextBox.value;
+    remark = 'Miscellaneous: ' + remark
+    
+    // Get the reg_no value from the hidden input field
+    var regNo = regNoInput.value;
+
+    // Check if all inputs are provided
+    if (user.trim() === "" || post.trim() === "" || remark.trim() === "") {
+        alert("Please fill in all fields.");
+        return;
+    }
+    if (!regNo) {
+        alert("Student registration number is missing.");
+        return;
+    }
+
+    // Prepare data to send
+    var data = {
+        reg_no: regNo,  // Use the value of the hidden input
+        user: user,     // New data for user
+        post: post,     // New data for post
+        remark: remark  // Remark data
+    };
+    
+    // Make the POST request to the API
+    fetch("/entry/mics/activity", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Handle the response from the API
+        if (data.success) {
+            alert("Activity successfully raised!");
+            // Add a new row to the table at the top
+            addNewRow(user, post, remark);
+
+            // Hide the input fields after successful submission
+            hideInputFields();
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred while submitting the activity.");
+    });
+}
+
+// Function to add a new row at the top of the table
+function addNewRow(user, post, remark) {
+    // Get current date-time
+    var date = new Date();
+    
+    // Format Date and Time separately
+    var formattedDate = date.getDate().toString().padStart(2, '0') + '-' +
+                        (date.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                        date.getFullYear();
+    var formattedTime = date.getHours().toString().padStart(2, '0') + ':' +
+                        date.getMinutes().toString().padStart(2, '0') + ':' +
+                        date.getSeconds().toString().padStart(2, '0');
+
+    // Create a new row
+    var newRow = document.createElement("tr");
+
+    // Insert new cells into the row for Date, Time, User, Post, and Remark
+    newRow.innerHTML = `
+        <td>${formattedDate}</td>
+        <td>${formattedTime}</td>
+        <td>${user}</td> <!-- Added User -->
+        <td>${post}</td>  <!-- Added Post -->
+        <td>${remark}</td>
+    `;
+
+    // Insert the new row at the top of the table
+    tableBody.insertBefore(newRow, tableBody.firstChild);
+}
+
+// Function to hide input fields and reset values after submission
+function hideInputFields() {
+    remarkTextBox.style.display = "none";
+    submitBtn.style.display = "none";
+
+    remarkTextBox.value = "";
+}
+
+
+</script>

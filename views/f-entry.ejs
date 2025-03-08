@@ -1,0 +1,323 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+
+    <link rel="stylesheet" href="/CSS/sty.css">
+
+    <style>
+        /* Other styles */
+        .input {
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .input_area {
+            padding: 0px;
+            padding-top: 0px;
+        }
+
+        /* Background color overr
+        ide */
+        body {
+            background-color: #a8c0ff !important;
+        }
+
+        .content-wrapper{
+            padding-left: 50px;
+            padding-top: 0px;
+        }
+        .box-header{
+            padding-bottom: 10px;
+        }
+
+        .action-button {
+            text-decoration: none;
+            color: #4C6A92;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s ease;
+            font-size: 14px;
+            width: 200px;
+        }
+        .content-box {
+            position: relative; /* Allow for absolute positioning of child elements */
+            margin-top: 40px;
+        }
+        
+        .actionArea {
+            position: absolute;  
+            top: 23px;
+            right: 200px;
+            z-index: 1;
+        }
+
+        .highlighted-number {
+            font-weight: bold;
+            color: #333; /* Default color for the number */
+            font-size: 16px;
+        }
+        
+        .action-button {
+            text-decoration: none;
+            color: #4C6A92;
+            background: #f4f6f9;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s ease;
+            font-size: 14px;
+            width: 200px;
+        }
+        
+        .action-button.warning {
+            background-color: #FFD700; /* Custom yellow color for warning */
+            color: #333; /* Text color */
+        }
+        
+        .action-button.danger {
+            background-color: #f84343; /* Light red color for danger */
+            color: #fff; /* White text on the danger button */
+        }
+        .action-button.danger span {
+            color: #fff; /* White text on the danger button */
+        }
+        
+        .action-button:hover {
+            opacity: 0.9; /* Slight opacity change on hover for interactivity */
+        }
+        .forceBtn{
+            padding: 1px 8px;
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <div class="content">
+
+        <div class="headerWlc" style="position: absolute; top: 8px; right: 20px; color: rgb(41, 21, 7);">
+            Welcome, <%=name%> (<%=post%>)
+        </div>
+
+
+        <div class="content-box">
+            <% if (f !== 'first') { %>
+            <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); margin-bottom: 20px; margin-top: 30px;">
+                <% if (errorType === 'Disable') { %>
+                    <img src="/Images/disable.png" alt="Yes Image" style="width: 250px; height: auto; display: inline-block;">
+                <% } else if (errorType === 'success_in') { %>
+                    <img src="/Images/entry_s.png" alt="Yes Image" style="width: 250px; height: auto; display: inline-block;">
+                <% } else if (errorType === 'success_out') { %>
+                    <img src="/Images/exit_s.png" alt="Yes Image" style="width: 250px; height: auto; display: inline-block;">
+                <% } else { %>
+                    <img src="/Images/<%=errorType === 'AlreadyIn' ? 'entry_e.png' : 'exit_e.png'%>" alt="Yes Image" style="width: 250px; height: auto; display: inline-block;">
+                <% } %>
+            </div>
+            <% } %>
+
+            <!-- Box header with title and button -->
+            <div class="box-header">
+                <% if (role === 'InUser') { %>
+                <h2 style="font-weight: bold;">Entry Gate In &nbsp;&nbsp;<i id="masterEntry" onclick="openMasterIdForm()" class="fas fa-id-card"></i></h2>
+                <% } else { %>
+                <h2 style="font-weight: bold;">Entry Gate Out &nbsp;&nbsp;<i id="masterExit" onclick="openMasterExit()" class="fas fa-id-card"></i></h2>
+                <% } %>
+                <a href="" id="logout-btn" class="create-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+
+            <% let action = role === 'InUser' ? 'In' : 'Out'; %>
+
+            <div class="content-wrapper">
+                <!-- Input field container -->
+                <div class="input-container">
+                    <div class="input_area" style="display: flex; align-items: center;">
+                        <form action="/entry/gate/<%=role%>/<%=action%>" method="post" id="form_entry" style="display: inline-flex;">
+                            <input class="input" placeholder="Reg. / Barcode No." name="reg_no" id="reg_no" value="<%= f != 'first' ? bandData.reg_no : '' %>" type="text">
+                            <input class="input" name="force_exit_value" id="force_exit_value" value="" type="hidden">
+                        </form>
+                    
+                        <% if (f !== 'first') { %>
+                            <% if (errorType === 'Disable' && action === 'Out') { %>
+                                <% if (f_exit === 'show') { %>
+                                    &nbsp;&nbsp;<button class="forceBtn" onclick="aaaa()" style="display: inline-block;">Allow Exit</button>
+                                <% } %>
+                            <% } %>
+                    </div>
+                    
+                        <div class="actionArea">
+                            <% if (bandData.m_activity === 0) { %>
+                                <a href="#" tabindex="8" id="openModalBtn" class="action-button">
+                                    <i class="fas fa-eye"></i> <span class="highlighted-number"></span>Add Miscellaneous
+                                </a>
+                            <% } else { %>
+                                <a href="#" tabindex="8" id="openModalBtn" class="action-button <%=bandData.m_activity > 0 ? 'warning' : 'danger'%>">
+                                    <i class="fas fa-eye"></i> <span class="highlighted-number"><%=bandData.m_activity%></span> Miscellaneous
+                                </a>
+                            <% } %>
+                        </div>     
+
+
+                        <%- include('./include/data.ejs', { bandData: bandData, type: barcode_type }) %>
+                   
+
+                </div>
+            
+                <!-- Image container -->
+                <div class="image-container">
+                    <img src="/<%=barcode_type === 'faculty_data' ? 'staff-' : ''%>Images/<%=bandData.photo_path%>.jpg" alt="User Image"> <!-- Placeholder passport-size image -->
+                </div>
+            </div>
+            
+            <% if (entryD !== 'none') { %>
+                <div class="entryTable">
+                    <%- include('./include/entryTable.ejs', {entry_data}) %>
+                </div>
+            <% } %>
+
+
+            <div class="aaa">
+                ex
+            </div>
+        </div>
+
+        <%- include('./include/m_activity_model.ejs', {reg_no_s: bandData.reg_no, show: 'Yes', user_name: user_access_data.name, user_post: user_access_data.post}) %>
+        <% } %>
+    </div>
+    <%- include('./include/masterIdScan.ejs') %>
+    <%- include('./include/masterExitModel.ejs') %>
+    
+
+
+</body>
+
+<script>
+    document.getElementById("reg_no").focus();
+    document.getElementById("reg_no").select();
+
+    document.getElementById('force_exit_value').value = '';
+    // This should be rendered on the page, using the value passed from the serve
+
+    function aaaa() {
+        document.getElementById("force_exit_value").value = "yes";
+        document.getElementById("form_entry").submit();
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent the default anchor tag behavior
+        // Make a POST request to the logout API
+        fetch('/login/logout', {
+            method: 'POST', // HTTP method POST
+            headers: {
+                'Content-Type': 'application/json', // You may adjust the content type as needed
+                // Add additional headers if necessary (e.g., Authorization)
+            },
+            body: JSON.stringify({
+                // Optional: Send data to the API if needed (e.g., user details, token)
+                // You can send any payload if required, like:
+                // token: 'user-token'
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Handle successful logout (optional)
+                window.location.href = '/'; // Redirect to login page or home page
+            } else {
+                // Handle error response (optional)
+                console.error('Logout failed', response);
+            }
+        })
+        .catch(error => {
+            console.error('An error occurred during logout', error);
+        });
+    });
+
+
+    function openMasterIdForm() {
+        document.getElementById('masterFormModel').style.display = 'flex';
+        document.getElementById('master_id_input').focus();
+    }
+
+    function closeMasterModal() {
+        document.getElementById('masterFormModel').style.display = 'none';
+    }
+
+    function openMasterExit() {
+        document.getElementById('exitModel').style.display = 'flex';
+        fetchEntryData();
+    }
+    
+    function fetchEntryData() {
+        // Make the GET request to fetch data
+        fetch('/entry/master/card/out') // Modify with the correct URL for your API endpoint
+            .then(response => response.json()) // Assuming the response is in JSON format
+            .then(data => {
+                const tableBody = document.querySelector('.exitDataa tbody');
+                tableBody.innerHTML = ''; // Clear the table before adding new data
+            
+                data.forEach(entry => {
+                        const row = document.createElement('tr');
+            
+                        row.innerHTML = `
+                            <td>${entry.name}</td>
+                            <td>${entry.mobile}</td>
+                            <td>${entry.email}</td>
+                            <td>${entry.c_id.split('T')[0]}</td> <!-- Date only -->
+                            <td>${entry.c_id.split('T')[1]}</td> <!-- Time only -->
+                            <td>${entry.m_card_holder}</td>
+                            <td>${entry.post}</td>
+                            <td>
+                                <button class="markExitBtn" data-id="${entry.id}" onclick="markExit('${entry.id}')">Mark Exit &nbsp;&nbsp;<i class="fa fa-sign-out-alt"></i></button>
+                            </td>
+                        `;
+
+                        tableBody.appendChild(row);
+                    
+                });
+            })
+            
+            .catch(error => {
+                console.error('Error fetching entry data:', error);
+            });
+    }
+    
+    function markExit(id) {
+        // This function will be called when "Mark Exit" button is clicked
+        // Implement the functionality to update the status to 'Out' for the given id
+        fetch(`/entry/master/card/markExit/${id}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Exit marked successfully!');
+                    // Optionally, remove the row from the table or update the row with "Exit" status
+                    fetchEntryData(); // Refresh the table data after marking exit
+                } else {
+                    alert('Error marking exit');
+                }
+            })
+            .catch(error => {
+                console.error('Error marking exit:', error);
+            });
+    }
+
+    function closeMasterExit() {
+        document.getElementById('exitModel').style.display = 'none';
+    }
+
+</script>
+
+<script src="/JS/m.js"></script>
+

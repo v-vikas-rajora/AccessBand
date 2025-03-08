@@ -1,0 +1,478 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+    <link rel="stylesheet" href="/CSS/style.css">
+
+    <style>
+        body{
+            background: linear-gradient(135deg, #f1f1f1, #a8c0ff);
+        }
+
+        .input_area, .filterArea1, .filterArea2, .btnArea{
+            padding-left: 20px;
+        }
+
+        .filterArea1, .filterArea2, .btnArea{
+            margin-top: 30px;
+        }
+
+        .btnArea{
+            margin-bottom: 20px;
+        }
+
+        .input{
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff; 
+            width: 200px;
+            margin-left: 50px;
+            font-size: 14px;
+            padding-left: 10px;
+        }
+
+        select{
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            width: 200px;
+            height: 32px;
+            font-size: 14px;
+            margin-left: 50px;
+        }
+
+        .input.first, .first{
+            margin-left: 0px;
+        }
+
+
+        .input:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+            background-color: #f4f6f9;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+  
+        .dropbtn {
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff; 
+            width: 200px;
+            margin-left: 50px;
+            font-size: 14px;
+            text-align: left;
+            padding-left: 10px;
+        }
+        
+        /* Dropdown content (hidden by default) */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            width: 200px;
+            border-radius: 10px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            margin-left: 50px;
+            max-height: 200px;
+            overflow: auto;
+        }
+
+        .dropdown-content label {
+            padding: 8px 16px;
+            display: block;
+            cursor: pointer;
+            font-size: 14px;
+        }
+  
+        .dropdown-content input {
+            margin-right: 10px;
+        }
+
+        /* Style for the Search button */
+        .search-btn {
+            padding: 5px 18px;
+            background-color: #4C6A92;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-left: 50px;
+            font-size: 14px;
+        }
+
+        .search-btn:hover {
+            background-color: #0056b3;
+        }
+
+
+        .input.first, .first{
+            margin-left: 0px;
+        }
+
+        .actionArea {
+            display: flex;
+            justify-content: space-between; /* Distribute space between count and export area */
+            align-items: center;
+            padding: 5px;
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+        .count{
+            font-size: 15px;
+        }
+        #updateBtn{
+            padding: 0px 0px;
+            height: 30px;
+            width: 150px;
+            font-size: 14px;
+            margin-right: 20px;
+        }
+        .exportArea {
+            display: flex;
+            align-items: center;
+        }
+
+
+        .fetchtableArea {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #fff;
+            overflow: auto;
+            padding: 20px;
+            padding-top: 0px;
+            height: 100%;
+        }
+
+        .fetchTable {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .fetchTable thead {
+            position: sticky;
+            top: 0;
+            background-color: #e5e3e3;
+            color: #4C6A92;
+            font-size: 14px;
+        }
+
+        .fetchTable th, .fetchTable td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .fetchTable tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .fetchTable th {
+            font-weight: bold;
+        }
+
+        .fetchTable td {
+            color: #333;
+            font-size: 14px;
+        }
+
+        
+        #searchArea {
+            height: auto;  /* Initial height based on content */
+            position: relative;  /* Ensure the Modify Search button is positioned correctly */
+            transition: height 5s ease;  /* Slower transition for height */
+            margin-top: 0px;
+            margin-bottom: 15px;
+            padding-top: 20px;
+        }
+        
+        
+        #searchArea.collapsed {
+            height: 40px;  /* Collapse height to 15px */
+            padding: 0;  /* Remove padding when collapsed */
+        }
+        
+        #modifySearchBtn {
+            position: absolute;  /* Position the button absolutely within the search area */
+            top: 10px;  /* Distance from the top */
+            right: 20px;  /* Distance from the right edge of the search area */
+            display: block;
+            border: none;
+            font-size: 16px;
+            color: #0078d4;
+            text-decoration: none; /* No underline initially */
+            background-color: #fff;
+        } 
+
+        #header{
+            padding-bottom: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('./include/sidebaar.ejs', {role: user_access_data.role, name: user_access_data.name, post: user_access_data.post}) %>
+    
+    <div class="content">
+        <div class="content-box">
+            <div class="box-header" id="header">
+                <h2>Bulk Exit</h2>
+            </div>
+        
+            <div class="searchArea" id="searchArea">
+                <div class="searchContent" id="searchInnerArea">
+                    <div class="input_area">
+                        <select id="dateSelector" class="first">
+                            <option value="" selected disabled>Select Date</option>
+                            <option value="today">Today</option>
+                            <option value="range">Range</option>
+                        </select>
+                        
+                        <input type="datetime-local" id="startDate" class="input">
+                        <input type="datetime-local" id="endDate" class="input">
+                    </div>
+                    
+                    <div class="filterArea2">
+                        <div class="dropdown">
+                            <button class="dropbtn first">Choose School</button>
+                            <div class="dropdown-content first school">
+                            </div>
+                        </div>
+                    
+                        <div class="dropdown">
+                            <button class="dropbtn">Choose Program</button>
+                            <div class="dropdown-content program">
+                            </div>
+                        </div>
+                    
+                        <div class="dropdown">
+                            <button class="dropbtn">Choose Semester</button>
+                            <div class="dropdown-content semester">
+                            </div>
+                        </div>
+                    
+                        <div class="dropdown">
+                            <button class="dropbtn">Choose Section</button>
+                            <div class="dropdown-content section">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filterArea1">
+                        <input type="text" class="input first" placeholder="Registration No.">
+                        <input type="text" class="input" placeholder="Barcode No.">
+                        <input type="text" class="input" placeholder="Student Name" name="" id="">
+                        <button id="searchBtn" class="search-btn">Search</button>
+
+                    </div>
+
+                    <div class="btnArea">
+                        
+                    </div>
+                    
+                </div>
+                <button id="modifySearchBtn" style="display: none;"><i class="fas fa-edit"></i> &nbsp;Modify Search</button>
+            </div>
+
+            <div class="actionArea">
+                <div class="count">
+                    <input type="checkbox" name="" id="selectAllCheckbox">&nbsp;
+                    <label for="selectAllCheckbox">Total count : 140 records found.</label>
+                </div>
+
+                <div class="exportArea">
+                    <div class="actionItem">
+                        <button class="search-btn first" style="margin-left: 20px;" id="updateBtn">Mark Student Exit</button>
+                    </div>
+                </div>
+            </div>
+    
+            <%- include('./include/bulkData.ejs') %>
+
+        </div>
+
+        
+    </div>
+</body>
+
+<script>
+
+    document.getElementById('dateSelector').focus();
+    document.querySelector('.actionArea').style.visibility = 'hidden';
+    document.getElementById('updateBtn').style.visibility = 'hidden';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelector('.fetchTable').style.visibility = 'hidden';
+
+        const dateSelector = document.getElementById('dateSelector');
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        
+        // Function to toggle input fields based on the selected option
+        function toggleDateInputs() {
+            const today = new Date();
+            const currentDate = today.toLocaleDateString('en-CA'); 
+            const startOfDay = `${currentDate}T00:00`; // Set the start of the day (00:00)
+            const endOfDay = `${currentDate}T23:59`; // Set the end of the day (23:59)
+        
+            if (dateSelector.value === 'today') {
+                startDate.disabled = true;
+                endDate.disabled = true;
+                startDate.style.backgroundColor = 'rgb(230, 239, 239)';
+                endDate.style.backgroundColor = 'rgb(230, 239, 239)';
+                
+                // Set the current date as the value for the date inputs
+                startDate.value = startOfDay;
+                endDate.value = endOfDay;
+            } else {
+                startDate.disabled = false;
+                endDate.disabled = false;
+                startDate.style.backgroundColor = '';
+                endDate.style.backgroundColor = '';
+                
+                // Clear the values if not 'today'
+                startDate.value = '';
+                endDate.value = '';
+            }
+        }
+        
+    
+        // Event listener for date selector change
+        dateSelector.addEventListener('change', toggleDateInputs);
+    
+        // Run the function on page load in case "Today" is pre-selected
+        toggleDateInputs();
+    });
+    
+    document.getElementById('searchBtn').addEventListener('click', function() {
+        const dateSelector = document.getElementById('dateSelector');
+        const startDateS = document.getElementById('startDate');
+        const endDateS = document.getElementById('endDate');
+        
+        if (!dateSelector.value) {
+            alert('Please select a date option.');
+            dateSelector.focus();
+            return;
+        }
+    
+        if (dateSelector.value === 'range' && !startDateS.value) {
+            alert('Please select a start date.');
+            startDateS.focus();
+            return;
+        }
+        
+        if (dateSelector.value === 'range' && !endDateS.value) {
+            alert('Please select an end date.');
+            endDateS.focus();
+            return;
+        }
+        
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const regNo = document.querySelector('input[placeholder="Registration No."]').value;
+        const barcodeNo = document.querySelector('input[placeholder="Barcode No."]').value;
+        const studentName = document.querySelector('input[placeholder="Student Name"]').value;
+    
+        // Get selected checkboxes from each dropdown
+        const school = getSelectedValues('.dropdown-content.school');  // School dropdown
+        const program = getSelectedValues('.dropdown-content.program'); // Program dropdown
+        const semester = getSelectedValues('.dropdown-content.semester'); // Semester dropdown
+        const section = getSelectedValues('.dropdown-content.section'); // Section dropdown
+    
+        const params = {
+            startDate: startDate,
+            endDate: endDate,
+            regNo: regNo,
+            barcodeNo: barcodeNo,
+            studentName: studentName,
+            school: school.join(','), // Joining selected values with commas
+            program: program.join(','),
+            semester: semester.join(','),
+            section: section.join(',')
+        };
+    
+        // Hide action area and updateBtn initially
+        document.querySelector('.actionArea').style.visibility = 'hidden';
+        document.getElementById('updateBtn').style.visibility = 'hidden';
+    
+        fetch(`/reports/fetch/bulkExit?${new URLSearchParams(params)}`)
+        .then(response => response.json())
+        .then(data => {
+            updateTable(data); // Update the table with the fetched data
+            
+            // Update the count in the label after receiving the data
+            const countLabel = document.querySelector('label[for="selectAllCheckbox"]');
+            countLabel.textContent = `Total count : ${data.length} records found.`;
+    
+            // Show the action area and updateBtn only if the count is greater than 0
+            if (data.length > 0) {
+        
+                document.querySelector('.actionArea').style.visibility = 'visible';
+                document.getElementById('updateBtn').style.visibility = 'visible';
+
+                document.getElementById('searchArea').classList.add('collapsed');
+
+                document.getElementById('searchInnerArea').style.display = 'none';
+                // Show the 'Modify Search' button inside the search area
+                document.getElementById('modifySearchBtn').style.display = 'block';
+            }
+            
+            // Show the table once the data is loaded
+            document.querySelector('.fetchTable').style.visibility = 'visible';
+        })
+        .catch(error => console.error('Error:', error));
+    });
+            
+    // Function to get selected checkbox values for each dropdown
+    function getSelectedValues(selector) {
+        const checkboxes = document.querySelectorAll(`${selector} input:checked`);
+        const selectedValues = Array.from(checkboxes).map(checkbox => checkbox.parentElement.innerText.trim());
+        return selectedValues;
+    }
+    
+    // Function to update the table with data
+    function updateTable(data) {
+        const tableBody = document.querySelector('.fetchTable tbody');
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+
+            
+            let dateObj = new Date(row.date_time_in);
+
+            // Format the date as dd-mm-yyyy
+            let dateFormatted = `${dateObj.getDate().toString().padStart(2, '0')}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getFullYear()}`;
+
+            // Format the time as HH:mm:ss
+            let timeFormatted = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}:${dateObj.getSeconds().toString().padStart(2, '0')}`;
+
+            tr.innerHTML = `
+                <td><input type="checkbox" name="" id="">&nbsp;&nbsp;${row.reg_no}</td>
+                <td>${row.barcode}</td>
+                <td>${row.name}</td>
+                <td>${row.school}</td>
+                <td>${row.program}</td>
+                <td>${row.sem}</td>
+                <td>${row.section}</td>
+                <td>${dateFormatted}</td>
+                <td>${timeFormatted}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
+    
+</script>
+
+<script src="/JS/filter.js"></script>

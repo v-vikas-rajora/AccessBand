@@ -1,0 +1,64 @@
+<div class="data-info">
+    <table>
+        <% if (type !== 'master_entry') { %>
+        <tr>
+            <td class="data_head left"><strong><%=type === 'student_data' ? 'Reg. No' : type === 'guest_data' ? 'Guest Id' : 'Employee Id'%></strong></td>
+            <td class="left_data">:&nbsp;&nbsp; <%= bandData.reg_no %></td>
+            <td class="data_head right"><strong><%=type === 'student_data' ? 'School' : type === 'guest_data' ? 'Person Type' : 'Site'%></strong></td>
+            <td>:&nbsp;&nbsp; <%=type === 'student_data' ? bandData.school : type === 'guest_data' ? bandData.type : bandData.site%></td>
+        </tr>
+        <% } %>
+        <tr>
+            <td class="data_head left"><strong>Name</strong></td>
+            <td class="left_data">:&nbsp;&nbsp; <%= bandData.name %></td>
+            <td class="data_head right"><strong><%=type === 'student_data' ? 'Program' : type === 'master_entry' || type === 'guest_data' ? 'Remark' : 'Faculty Type'%></strong></td>
+            <% if (type === 'student_data') { %>
+                <td>:&nbsp;&nbsp; <%= bandData.program %></td>
+            <% } else if (type === 'faculty_data') { %>
+                <td>:&nbsp;&nbsp; <%= bandData.hostel === 'N/A' ? 'Non-Resident' : 'Resident (' + bandData.hostel + ')'  %> </td>
+            <% } else { %>
+                <td>:&nbsp;&nbsp; <%= bandData.remark  %> </td>
+            <% } %>
+        </tr>
+        <% if (type === 'student_data') { %>
+        <tr>
+            <td class="data_head left"><strong>Father Name</strong></td>
+            <td class="left_data">:&nbsp;&nbsp; <%= bandData.f_name %></td>
+            <td class="data_head right"><strong>Semester</strong></td>
+            <td>:&nbsp;&nbsp; <%= bandData.sem %></td>
+        </tr>
+        <% } %>
+        <tr>
+            <td class="data_head left"><strong>Email</strong></td>
+            <td class="left_data">:&nbsp;&nbsp; <%= bandData.email %></td>
+            <td class="data_head right"><strong><%=type === 'student_data' ? 'Section' : 'Mob.' %></strong></td>
+            <td>:&nbsp;&nbsp; <%= type === 'student_data' ?  bandData.section : bandData.mobile %></td>
+        </tr>
+        <% if (type === 'student_data') { %>
+        <tr>
+            <td class="data_head left"><strong>Mob.</strong></td>
+            <td class="left_data">:&nbsp;&nbsp; <%= bandData.mobile %></td>
+            <td class="data_head right"><strong>Student Type</strong></td>
+            <td>:&nbsp;&nbsp; <%= bandData.type %> <%= bandData.type === 'Hosteller' || bandData.type === 'Lakshya Hosteller' ? '(' + bandData.hostel + ')' : '' %> </td>
+        </tr>
+        <% } %>
+        <% if (type === 'master_entry') { %>
+            <tr>
+                <td class="data_head left"><strong>Mster Card Holder</strong></td>
+                <td class="left_data">:&nbsp;&nbsp; <%= bandData.m_card_holder %></td>
+                <td class="data_head right"><strong>Designation</strong></td>
+                <td>:&nbsp;&nbsp; <%= bandData.post %> </td>
+            </tr>
+        <% } %>
+
+        <% if (type === 'guest_data') { %>
+            <tr>
+                <td class="data_head left"><strong>Authorised Employee</strong></td>
+                <td class="left_data">:&nbsp;&nbsp; <%= bandData.eName %></td>
+                <td class="data_head right"><strong>Employee Email</strong></td>
+                <td>:&nbsp;&nbsp; <%= bandData.eEmail %> </td>
+            </tr>
+        <% } %>
+
+    </table>
+</div>

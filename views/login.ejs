@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccessBand</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f1f1f1, #a8c0ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 340px;
+            text-align: center;
+        }
+        h2 {
+            color: #4C6A92;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box; /* Ensures padding and border are included in width */
+        }
+        .input-field:focus {
+            outline: none;  /* Remove default outline */
+            border-color: #ddd; /* Keep border color same as normal state */
+        }
+        /* Removed border color change on focus */
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #4C6A92;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 10px; /* To maintain consistent space */
+            box-sizing: border-box; /* Ensures padding is included in width */
+        }
+        .login-btn:hover {
+            background-color: #3b5575;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .footer-links a {
+            color: #4C6A92;
+            text-decoration: none;
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        .alert-warning{
+            background-color: #3b5575;
+            text-align: left;
+            color: #664d03;
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>AccessBand!</h2>
+        <form id="loginForm">
+            <input type="text" class="input-field" placeholder="Username" id="username" name="username_input" required>
+            <input type="password" class="input-field" placeholder="Password" name="password_input" required>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+        <div class="footer-links"></div>
+    </div>
+</body>
+</html>
+
+<script>
+    document.getElementById('username').focus();
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();  // Prevent the default form submission
+
+        const username = document.getElementById('username').value;
+        const password = document.querySelector('input[name="password_input"]').value;
+
+        try {
+            const response = await fetch('/login/authenticate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // If login is successful, proceed based on user role
+                window.location.href = result.redirect_url;  // Redirect according to user role
+            } else {
+                if (result.message === 'Account has been disabled, Kindly Contact to Administrator.') {
+                    alert(result.message);
+                    window.location.href = '/';
+                } else if (result.action_needed) {
+                    // Prompt for confirmation if the user is logged in elsewhere
+                    const confirmation = confirm(result.message); // Show Yes/No confirmation dialog
+                    if (confirmation) {
+                        // Yes, log out the other session and log in again
+                        // Send a request to forcefully log out the other session
+                        const logoutResponse = await fetch('/login/force-logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ username })  // Send username to log out the other session
+                        });
+
+                        const logoutResult = await logoutResponse.json();
+
+                        if (logoutResult.success) {
+                            // Now proceed with the login process after the other session is logged out
+                            const retryLoginResponse = await fetch('/login/authenticate', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ username, password })
+                            });
+
+                            const retryLoginResult = await retryLoginResponse.json();
+
+                            if (retryLoginResult.success) {
+                                // If login is successful, proceed based on user role
+                                window.location.href = retryLoginResult.redirect_url;  // Redirect according to user role
+                            } else {
+                                alert(retryLoginResult.message);
+                            }
+                        } else {
+                            alert(logoutResult.message);
+                        }
+                    } else {
+                        // No, redirect to home
+                        window.location.href = '/';
+                    }
+                } else {
+                    alert(result.message);
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while logging in. Please try again.');
+        }
+    });
+</script>
+

@@ -1,0 +1,131 @@
+<style>
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 400px;
+        position: relative;
+    }
+    
+    .modal-header {
+        font-size: 18px;
+        color: #4C6A92;
+        font-weight: bold;
+        margin-bottom: 0px;
+        text-align: center;
+    }
+    
+    .modal input, .modal select {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    .modal .submit-btn {
+        background-color: #4C6A92;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .modal .submit-btn:hover {
+        background-color: #3a5b7d;
+    }
+    
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 30px;
+        color: #4C6A92;
+        cursor: pointer;
+    }
+
+    .modal-header{
+        padding: 0px !important;
+        padding-bottom: 5px !important;
+    }
+
+    #master_id_input{
+        margin-top: 20px !important;
+        padding: 7px !important;
+        border-radius: 3px !important;
+    }
+
+    .master_id_submit{
+        margin-top: 10px !important;
+        padding: 5px 8px !important;
+    }
+
+    .input-container-master {
+        position: relative;
+    }
+    
+    
+    #master_id_input {
+        padding-right: 30px; /* To make space for the icon on the right */
+        margin-bottom: 20px;
+    }
+    
+</style>
+
+
+<div id="masterFormModel" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeMasterModal()">&times;</span>
+        <div class="modal-header" id="master_form_header">Scan Master Card</div>
+            <div class="input-container-master">
+                <input type="password" id="master_id_input" placeholder="Scan Master Card"  autocomplete="new-password" required>
+            </div>
+    </div>
+</div>
+
+
+<script>
+    document.getElementById("master_id_input").addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            let masterId = event.target.value;
+            checkMasterId(masterId);
+        }
+    });
+    
+    function checkMasterId(masterId) {
+        fetch('/entry/scan/master/card', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ master_id: masterId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.userExists) {
+                window.location.replace('/entry/master/card');
+            } else {
+                alert("Master ID not found or invalid!");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    
+</script>

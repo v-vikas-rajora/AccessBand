@@ -1,0 +1,97 @@
+<table id="userTable">
+    <thead>
+        <tr>
+            <th style="padding-left: 30px;">Name</th>
+            <th>Reg. No.</th>
+            <th>Father Name</th>
+            <th>School</th>
+            <th>Program</th>
+            <th>Year / Sem</th>
+            <th>Section</th>
+            <th>Mobile No.</th>
+            <th>No. of Activity</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% users.forEach(function(user) { %>
+            <tr>
+                <td style="padding-left: 30px;"><%= user.reg_no %></td>
+                <td><%= user.name %></td>
+                <td><%= user.f_name %></td>
+                <td><%= user.school %></td>
+                <td><%= user.program %></td>
+                <td><%= user.sem %></td>
+                <td><%= user.section %></td>
+                <td><%= user.mobile %></td>
+                <td><%= user.m_activity %></td>
+                <td>
+                    <!-- View button (kept as it is) -->
+                    <button class="view-btn" id="openModalBtn" data-reg-no="<%= user.reg_no %>">
+                        <i class="fas fa-eye"></i> View 
+                    </button>
+                    
+                    <!-- Action button for enable/disable -->
+                    <button class="action-btn" data-reg-no="<%= user.reg_no %>" data-status="<%= user.status %>">
+                        <!-- Dynamically change icon based on status -->
+                        <i class="fas <%= user.status === 'Y' ? 'fa-ban' : 'fa-check-circle' %>"></i>
+                        <%= user.status === 'Y' ? 'Disable' : 'Enable' %>
+                    </button>
+                </td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
+
+<script>
+    // Add event listener to all action buttons
+    document.querySelectorAll('.action-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const regNo = this.getAttribute('data-reg-no');
+            const currentStatus = this.getAttribute('data-status');
+            const newStatus = currentStatus === 'Y' ? 'N' : 'Y'; // Toggle the status
+    
+            // Show confirmation dialog before proceeding with the update
+            const action = newStatus === 'Y' ? 'enable' : 'disable';
+            const confirmMessage = `Are you sure you want to ${action} the account?`;
+            if (!confirm(confirmMessage)) {
+                return; // If the user cancels, do nothing
+            }
+    
+            // Prompt user for remark after confirmation (optional)
+            const remark = prompt("Please enter a remark for " + action + ' this account.');
+    
+            // If the user cancels the remark input, don't proceed with the request
+            if (remark === null) {
+                return; // If the user cancels, stop and do nothing
+            }
+    
+            // Make the PUT request to enable/disable the student
+            fetch(`/misc/student/account/${newStatus === 'Y' ? 'enable' : 'disable'}`, {
+                method: 'PUT',  // Use PUT for update
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ reg_no: regNo, remark: remark || '' })  // Include remark if provided, otherwise send empty string
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the button text and icon
+                    const actionBtn = this;
+                    actionBtn.innerHTML = `<i class="fas ${newStatus === 'Y' ? 'fa-ban' : 'fa-check-circle'}"></i> ${newStatus === 'Y' ? 'Disable' : 'Enable'}`;
+                    actionBtn.setAttribute('data-status', newStatus);
+                    
+                    // Show success alert
+                    alert(`${newStatus === 'Y' ? 'Enabled' : 'Disabled'} successfully!`);
+                } else {
+                    alert('Failed to update the status. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the status.');
+            });
+        });
+    });
+</script>

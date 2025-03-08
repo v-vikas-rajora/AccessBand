@@ -1,0 +1,283 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    
+}
+
+.header {
+    background: #4C6A92;
+    color: white;
+    height: 10px;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+/* Name of Rakesh Gupta outside the sidebar, just below the header */
+.user-name {
+    position: absolute;
+    top: 60px; /* Positioning below the header */
+    left: 20px; /* Align it to the left */
+    font-size: 18px;
+    font-weight: bold;
+    color: #4C6A92;
+}
+
+.sidebar {
+    width: 250px;
+    background: white;
+    color: #333333;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: calc(100vh - 0px); /* Adjust the height for the header */
+    margin-top: 0px; /* Sidebar starts after header */
+}
+
+.sidebar .title {
+    color: #4C6A92;
+    font-size: 24px;
+    margin-bottom: 0px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #333333;
+    padding: 10px;
+    border-radius: 5px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.3s ease;
+    justify-content: flex-start;
+    width: 100%; /* Make the buttons fill the full width */
+    font-size: 15px;
+}
+
+.sidebar a:focus,
+.sidebar a:active {
+    background: #ddd;
+    color: black;
+}
+
+.sidebar i {
+    font-size: 14px;
+    width: 24px;
+    text-align: center;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    padding-top: 0px;
+    background: transparent;
+    margin-top: 0px; /* Adjust the content position */
+}
+
+/* New box for content area */
+.content-box {
+    overflow: hidden;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 38px;
+    padding-bottom: 10px;
+}
+
+/* Heading and button container */
+.box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    padding: 20px;
+}
+
+.box-header h2 {
+    font-size: 20px;
+    color: #4C6A92;
+}
+
+.create-btn {
+    background-color: #4C6A92;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 500;
+}
+
+.create-btn:hover {
+    background-color: #3a5b7d;
+}
+
+#userTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0px;
+    table-layout: auto; /* Allow automatic column resizing */
+    max-height: 450px;
+    overflow: auto;
+}
+
+#userTable thead tr {
+    width: 100%;
+    background-color: #e5e3e3; /* Light grey */
+    text-transform: uppercase; /* To make the text uppercase */
+    height: 50px;
+}
+
+#userTable thead tr th {
+    padding: 10px;
+    text-align: left;
+    color: #4C6A92;
+    font-size: 13px; /* Smaller font size for table header */
+}
+
+#userTable tbody tr {
+    background: white;
+    height: 50px;
+}
+
+#userTable tbody tr td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 13px; /* Smaller font size for table data */
+}
+
+/* Align the action column content to the right */
+.usersData tbody tr td:last-child {
+    text-align: right;
+    min-width: 210px;
+}
+
+
+
+/* Style the buttons in the action column */
+#userTable td button {
+    margin-left: 5px;
+    margin-right: 5px;
+    display: inline-block; /* Ensure buttons stay in a horizontal row */
+    vertical-align: middle; /* Align buttons properly in the cell */
+}   
+
+
+/* Style the action buttons inside the table */
+#userTable button {
+    background: transparent;
+    border: none;
+    color: #4C6A92;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-right: 5px; /* Add some space between buttons */
+}
+
+#userTable button:hover {
+    background-color: #f0f0f0;
+    color: #3a5b7d;
+}
+
+#userTable button i {
+    font-size: 16px; /* Adjust icon size */
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    position: relative;
+}
+
+.modal-header {
+    font-size: 18px;
+    color: #4C6A92;
+    font-weight: bold;
+    margin-bottom: 0px;
+    text-align: center;
+}
+
+.modal input, .modal select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.modal .submit-btn {
+    background-color: #4C6A92;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.modal .submit-btn:hover {
+    background-color: #3a5b7d;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 30px;
+    color: #4C6A92;
+    cursor: pointer;
+}
+
+#userTable .submit-btn{
+    margin-top: 10px;
+}
+
+.content-box {
+    max-height: 650px; /* Adjust this value based on your design */
+
+}
+.create_user_submit{
+    margin-top: 10px;
+}
+h2{
+    font-weight: bold !important;
+}

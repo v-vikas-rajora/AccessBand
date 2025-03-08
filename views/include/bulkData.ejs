@@ -1,0 +1,109 @@
+<div class="fetchtableArea">
+    <table id="" class="fetchTable">
+        <thead>
+            <tr>
+                <th style="padding-left: 10px;">Reg. No.</th>
+                <th>Barcode No.</th>
+                <th>Name</th>
+                <th>School</th>
+                <th>Program</th>
+                <th>Semester</th>
+                <th>Section</th>
+                <th>Date In</th>
+                <th>Time In</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const tableBody = document.querySelector('.fetchTable tbody'); // Reference to tbody
+        const tableBodyCheckboxes = tableBody.querySelectorAll('input[type="checkbox"]'); // Initially select all checkboxes in tbody
+        
+        // Select all checkboxes when the header checkbox is clicked
+        selectAllCheckbox.addEventListener('change', function () {
+            // Select or deselect all checkboxes in tbody
+            tableBody.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+
+        // Delegate the "change" event to checkboxes inside tbody
+        tableBody.addEventListener('change', function(event) {
+            if (event.target.type === 'checkbox') {
+                const checkboxes = tableBody.querySelectorAll('input[type="checkbox"]');
+                // If any checkbox is unchecked, uncheck the "select all" checkbox
+                if (!event.target.checked) {
+                    selectAllCheckbox.checked = false;
+                } else {
+                    // If all checkboxes are checked, check the "select all" checkbox
+                    selectAllCheckbox.checked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+                }
+            }
+        });
+    });
+    document.getElementById('updateBtn').addEventListener('click', function() {
+        // Get all the selected checkboxes
+        const selectedCheckboxes = document.querySelectorAll('.fetchTable tbody input[type="checkbox"]:checked');
+        
+        // Collect the reg_no values of selected rows
+        const regNosToUpdate = [];
+        selectedCheckboxes.forEach(checkbox => {
+            const row = checkbox.closest('tr'); // Find the parent row of the checkbox
+            const regNo = row.querySelector('td').textContent.trim(); // Get the reg_no from the first column
+            regNosToUpdate.push(regNo);
+        });
+    
+        // If no rows are selected, show a message
+        if (regNosToUpdate.length === 0) {
+            alert('Please select at least one row.');
+            return;
+        }
+    
+        // Ask for confirmation before updating
+        const isConfirmed = confirm("Are you sure you want to mark the selected students as 'exit'?");
+        if (!isConfirmed) {
+            return; // Exit if the user cancels
+        }
+    
+        // Send an API request or fetch to update the database
+        fetch('/login/student/bulk/exit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                regNos: regNosToUpdate
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle the response, for example show a success message
+            if (data.success) {
+                alert('Student marked as exit successfully!');
+    
+                // Uncheck all selected checkboxes
+                selectedCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+    
+                window.location.href = '/login/student/bulk/exit';
+            } else {
+                // In case of error in response, show error message
+                alert('Error in marking student exit.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Only show this alert when there's a network or other fetch-related error
+            alert('An error occurred while updating the records.');
+        });
+    });
+    
+        
+</script>
+

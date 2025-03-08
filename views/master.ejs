@@ -1,0 +1,191 @@
+<%- include('./include/boilerplate.ejs') %>
+<link rel="stylesheet" href="/CSS/style.css">
+<head>
+    <style>
+        .input {
+            height: 32px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .input_area {
+            padding: 20px;
+            padding-top: 0px;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #007bff;
+            background-color: #f4f6f9;
+        }
+
+        body{
+            background: linear-gradient(135deg, #f1f1f1, #a8c0ff);
+        }
+
+        #em_tag{
+            font-style: normal;
+            font-size: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <%- include('./include/sidebaar.ejs', {role: user_access_data.role, name: user_access_data.name, post: user_access_data.post}) %>
+
+    <div class="content">
+        <!-- Content box with rounded corners -->
+        <div class="content-box">
+            <!-- Box header with title and button -->
+            
+            <% if (form_type === "entry_reg") { %>
+                <div class="box-header">
+                    <h2>Entry Details</h2>
+                </div>
+            <% } else if (form_type === "In") { %>
+                <div class="box-header">
+                    <h2>Entry In</h2>
+                </div>
+            <% } else if (form_type === "Out") { %>
+                <div class="box-header">
+                    <h2>Entry Out</h2>
+                </div>
+            <% } else { %>
+                <div class="box-header">
+                    <h2>Band <%=form_type === 'issue' ? 'Issue' : 'Action'%></h2>
+                </div>
+            <% } %>
+        
+            <!-- Form for "Reg. No." -->
+            <div class="input_area">
+
+                <% if (form_type === "In") { %>
+                    <form action="/entry/gate/<%=user_access_data.role%>/<%=form_type%>" class="master_form" method="POST">
+                        <input class="input input_reg" id="reg_no" name="reg_no" placeholder="Reg. / Emp Id /  Barcode No." type="text" required>
+                        <input class="input" placeholder="Reg. No." name="force_exit_value" id="" value="" type="hidden">
+                    </form>
+                
+                <% } else if (form_type === "Out") { %>
+                    <form action="/entry/gate/<%=user_access_data.role%>/<%=form_type%>" class="master_form" method="POST">
+                        <input class="input input_reg" id="reg_no" name="reg_no" placeholder="Reg. / Barcode No." type="text" required>
+                        <input class="input" placeholder="Reg. No." name="force_exit_value" id="" value="" type="hidden">
+                    </form>
+                        
+                <% } else if (form_type === "entry_reg") { %>
+                    <form action="/entry/details" class="master_form" method="GET">
+                        <input class="input input_reg" id="reg_no" name="reg_no" placeholder="Reg. / Barcode No." type="text" required>
+                    </form>
+                    
+                <% } else if ( form_type === 'issue') { %>
+                    <select class="input" style="padding: 0px; padding-left: 10px; padding-right: 5px;" name="" id="year-select">
+                        <option value="" selected disabled>Year</option>
+                        <option value="2019">2019</option>
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="FAC">STAFF</option>
+                        <option value="PIET">PIET</option>
+                        <option value="PCE">PCE</option>
+                        <option value="GUEST">GUEST</option>
+                    </select>
+                    
+                    &nbsp;&nbsp;<em id="em_tag">/</em>&nbsp;&nbsp;
+                    
+                    <input class="input input_reg" id="reg_no_s" name="input-text" placeholder="Reg. number" type="text">
+                    
+                    <form id="hidden_form" action="/band/<%= form_type %>" class="master_form" method="GET">
+                        <input class="input" id="reg_no" name="reg_no" type="hidden" required>
+                    </form>
+                    
+                    
+                <% } else { %>
+                    <form id="hidden_form" action="/band/<%=form_type%>" class="master_form" method="GET">
+                        <input class="input input_reg" id="reg_no" name="reg_no" placeholder="<%= form_type === 'action' ? 'Reg. / Barcode No.' : 'Reg. No.' %>" type="text" required>
+                    </form>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<% if (errorMessage.length > 0) { %>
+    <script>
+        alert('<%= errorMessage %>');    
+    </script>
+<% } %>
+
+<script>
+
+    const form_type_s = "<%=form_type%>";
+
+    if (form_type_s === "issue") {
+        document.getElementById('year-select').focus();
+    } else {
+        document.getElementById('reg_no').focus();
+    }
+   
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputField = document.querySelector('.input_reg');
+        const reg_no_s = document.getElementById('reg_no');
+        inputField.addEventListener('keypress', function (event) {
+            // Jab Enter key press ho
+            if (event.key === 'Enter') {
+                // Prevent form submission to keep the page from reloading
+                event.preventDefault();
+                
+               
+                if (reg_no_s.value.length > 3) {
+                    // Automatically submit the form if length is 10 or more
+                    document.querySelector('.master_form').submit();
+                } else {
+                    // Show an alert or any other feedback if length is less than 10
+                    alert('Please enter a valid registration number.');
+                }
+            }
+        });
+    });
+    
+
+
+    // Jab value select ya input text mein change ho, hidden input ka value update karo
+    document.getElementById('year-select').addEventListener('change', handleYearChange);
+    document.getElementById('reg_no_s').addEventListener('input', updateHiddenInput);
+    
+    function handleYearChange() {
+        // Clear the input field and focus when year is changed
+        document.getElementById('reg_no_s').value = ''; 
+        document.getElementById('reg_no_s').focus(); 
+    
+        // We also need to update the hidden input with just the year (without registration number)
+        var year = document.getElementById('year-select').value;
+        document.getElementById('reg_no').value = year ? year + '/' : '';
+
+
+        if (year === 'FAC') {
+            document.getElementById('reg_no_s').placeholder = 'Employee Id';
+        }
+
+    }
+    
+    function updateHiddenInput() {
+        var inputText = document.getElementById('reg_no_s').value;
+        var year = document.getElementById('year-select').value;
+    
+        // If both year and inputText are available, update the hidden input
+        if (year && inputText) {
+            var formattedValue = year + '/' + inputText;
+            document.getElementById('reg_no').value = formattedValue;
+        }
+    }
+    
+    
+    
+</script>

@@ -1,0 +1,208 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+    <style>
+        .input {
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .input_area {
+            padding: 20px;
+            padding-top: 0px;
+        }
+
+        .action-button {
+            text-decoration: none;
+            color: #4C6A92;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s ease;
+            font-size: 14px;
+            width: 200px;
+        }
+        .content-box {
+            position: relative; /* Allow for absolute positioning of child elements */
+        }
+        
+        .actionArea {
+            position: absolute;  /* Position this element relative to its closest positioned ancestor */
+            top: 30px;           /* Adjust the vertical position */
+            right: 30px;         /* Adjust the horizontal position */
+            z-index: 10;         /* Ensure it appears above other elements */
+        }
+
+        .highlighted-number {
+            font-weight: bold;
+            color: #333; /* Default color for the number */
+            font-size: 16px;
+        }
+        
+        .action-button {
+            text-decoration: none;
+            color: #4C6A92;
+            background: #f4f6f9;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s ease;
+            font-size: 14px;
+            width: 200px;
+        }
+        
+        .action-button.warning {
+            background-color: #FFD700; /* Custom yellow color for warning */
+            color: #333; /* Text color */
+        }
+        
+        .action-button.danger {
+            background-color: #f84343; /* Light red color for danger */
+            color: #fff; /* White text on the danger button */
+        }
+        .action-button.danger span {
+            color: #fff; /* White text on the danger button */
+        }
+        
+        .action-button:hover {
+            opacity: 0.9; /* Slight opacity change on hover for interactivity */
+        }
+
+        .forceBtn{
+            padding: 1px 8px;
+            border-radius: 4px;
+        }
+    </style>
+    <link rel="stylesheet" href="/CSS/sty.css">
+</head>
+
+<body>
+    <%- include('./include/sidebaar.ejs', {role: user_access_data.role, name: user_access_data.name, post: user_access_data.post}) %>
+
+    <div class="content">
+        <!-- Content box with rounded corners -->
+        <div class="content-box">
+
+            <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); margin-bottom: 20px; margin-top: 30px;">
+                <% if (errorType === 'Disable') { %>
+                    <img src="/Images/disable.png" alt="Yes Image" style="width: 250px; height: auto; display: inline-block;">
+                <% } else if (errorType === 'success_in') { %>
+                    <img src="/Images/entry_s.png" alt="Yes Image" style="width: 250px; height: auto; display: inline-block;">
+                <% } else if (errorType === 'success_out') { %>
+                    <img src="/Images/exit_s.png" alt="Yes Image" style="width: 250px; height: auto; display: inline-block;">
+                <% } else if (errorType === 'AlreadyIn') { %>
+                    <img src="/Images/entry_e.png" alt="Yes Image" style="width: 250px; height: auto; display: inline-block;">
+                <% } else if (errorType === 'AlreadyOut') { %>
+                    <img src="/Images/exit_e.png" alt="Yes Image" style="width: 250px; height: auto; display: inline-block;">
+                <% } %>
+            </div>
+
+
+            <div class="box-header">
+                <h2>Entry <%=errorType.length > 0 ? action : 'Details'%></h2>
+            </div>
+
+            <div class="content-wrapper">
+                <!-- Input field container -->
+                <div class="input-container">
+                    <div class="input_area" style="display: flex; align-items: center;">
+                        <form action="<%= (action == 'In' || action == 'Out') ? '/entry/gate/' + user_access_data.role + '/' + action : '/entry/details' %>" id="form_entry" method="<%=(action == 'In' || action == 'Out') ? 'POST' : 'GET'%>" style="display: inline-flex;">
+                            <input class="input" placeholder="Reg. No." name="reg_no" id="reg_no" value="<%= bandData ? bandData.reg_no : '' %>" type="text">
+                            <input class="input" name="force_exit_value" id="force_exit_value" value="" type="hidden">
+                        </form>
+                    
+                        <% if (errorType === 'Disable' && action === 'Out') { %>
+                            <% if (f_exit === 'show') { %>
+                                &nbsp;&nbsp;<button class="forceBtn" onclick="aaaa()" style="display: inline-block;">Allow Exit</button>
+                            <% } %>
+                        <% } %>
+                    </div>
+                    
+
+                    
+                    <div class="actionArea">
+
+                        <% if (bandData.m_activity === 0) { %>
+                            <a href="#" tabindex="8" id="openModalBtn" class="action-button">
+                                <i class="fas fa-eye"></i> <span class="highlighted-number"></span>Add Activity
+                            </a>
+                        <% } else { %>
+                            <a href="#" tabindex="8" id="openModalBtn" class="action-button <%=bandData.m_activity > 0 ? 'warning' : 'danger'%>">
+                                <i class="fas fa-eye"></i> <span class="highlighted-number"><%=bandData.m_activity%></span> View / Add Activity
+                            </a>
+                        <% } %>
+
+                    </div>     
+                    
+
+                    <%- include('./include/data.ejs', { bandData: bandData, type: barcode_type }) %>
+                </div>
+
+                <div class="image-container">
+                    <img src="/<%= barcode_type === 'faculty_data' ? 'staff-' : barcode_type === 'master_entry' || barcode_type === 'guest_data'  ? 'master-entry-' : '' %>Images/<%= bandData.photo_path %>.jpg" alt="User Image">
+                </div>
+
+            </div>
+            
+
+            <div class="entryTable">
+                <%- include('./include/entryTable.ejs') %>
+            </div>
+
+            <div class="aaa">
+                ex
+            </div>
+        </div>
+        <%- include('./include/m_activity_model.ejs', {reg_no_s: bandData.reg_no, show: 'Yes', user_name: user_access_data.name, user_post: user_access_data.post}) %>
+    </div>
+</body>
+
+<script>
+    document.getElementById('reg_no').focus();
+    document.getElementById('reg_no').select();
+
+    document.getElementById('force_exit_value').value = '';
+    // This should be rendered on the page, using the value passed from the server
+    const number = "<%=bandData.m_activity%>";
+    const barcodeType = "<%=barcode_type%>"
+    // Get the button and the highlighted number
+    const numberSpan = document.querySelector('.highlighted-number');
+
+    // Hide the button if the number is 0
+    if (number === 0 || !number) {
+        button.style.display = 'none'; // Hide the button
+    } else {
+        button.style.display = 'flex'; // Show the button if number is > 0
+
+        // Add classes for different states based on the number value
+        if (number > 0 && number < 2) {
+            button.classList.add('warning');  // Apply custom yellow color for warning
+            button.classList.remove('danger'); // Remove danger class if added
+        } else if (number >= 2) {
+            button.classList.add('danger');  // Apply custom light red color for danger
+            button.classList.remove('warning'); // Remove warning class if added
+        }
+    }
+    
+    if (barcodeType === 'master_entry') {
+        button.style.display = 'none';
+    }
+
+    
+    function aaaa() {
+        document.getElementById("force_exit_value").value = "yes";
+        document.getElementById("form_entry").submit();
+    }
+
+</script>
+
+<script src="/JS/m.js"></script>
+

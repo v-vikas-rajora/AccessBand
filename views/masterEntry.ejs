@@ -1,0 +1,392 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+
+    <link rel="stylesheet" href="/CSS/sty.css">
+
+    <style>
+        /* Other styles */
+        .input {
+            height: 32px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .input_area {
+            padding: 0px;
+            padding-top: 0px;
+        }
+
+        /* Background color overr
+        ide */
+        body {
+            background-color: #a8c0ff !important;
+        }
+
+        .content-wrapper{
+            padding-left: 50px;
+            padding-top: 0px;
+        }
+        .box-header{
+            padding-bottom: 10px;
+        }
+        .input{
+            width: 300px !important;
+        }
+
+        .data_head.right{
+            max-width: 20px;
+        }
+
+        .data_head.left{
+            max-width: 25px;
+        }
+
+        .left_data {
+            max-width: 70px;
+        }
+
+        .right_data{
+            max-width: 70px;
+        }
+
+        input:disabled {
+            background-color: #f0f0f0;
+        } 
+
+        #logout-btn{
+            padding: 7px 15px;
+        }
+
+        .btnArea{
+            padding: 50px 0px 20px 20px;
+        }
+
+        #cancelBtn, #submitEntryBtn{
+            padding: 2px 15px;
+            border-radius: 3px;
+        }
+
+        #submitEntryBtn{
+            background-color: #4C6A92;
+            color: #fff;
+            border-color: #4C6A92;
+            padding: 2.5px 20px;
+        }
+
+        video, canvas, img {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        img {
+            display: none;  /* Initially hide the image */
+        }
+
+        .imageBtnArea{
+            height: 50px;
+            padding-top: 10px;
+        }
+
+        #openBtnWebcam {
+            position: absolute;
+            top: 90px;  /* Set the top offset */
+            left: 50%;
+            transform: translateX(-50%);  /* Center the button horizontally */
+            z-index: 10;  /* Ensure button is above other elements */
+            height: 30px;
+            width: 100px;
+            font-size: 13px;
+            border-radius: 2px;
+        }
+
+        .imageBtnArea button {
+            font-size: 13px;
+            padding: 2px 20px;
+            border-radius: 2px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <div class="content">
+        <div class="content-box">
+            <!-- Box header with title and button -->
+            <div class="box-header">
+                <h2 style="font-weight: bold;">Master Card Entry</h2>
+                <a href="" id="logout-btn" class="create-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+
+            <div class="content-wrapper">
+                <!-- Input field container -->
+                <div class="input-container">
+                    <div class="input_area" style="display: flex; align-items: center;">
+                        
+                    </div>
+                    
+                    <div class="data-info">
+                        <table>
+                            <tr>
+                                <td class="data_head left"><strong>Name</strong></td>
+                                <td class="left_data">:&nbsp;&nbsp; <input type="text" name="name" class="input" placeholder="Enter Full Name" id="name" required></td>
+                                <td class="data_head right"><strong>Mobile</strong></td>
+                                <td class="right_data">:&nbsp;&nbsp; <input type="number" name="mobile" class="input" placeholder="Enter Mobile Number" id="mobile" required></td>
+                            </tr>
+                            <tr>
+                                <td class="data_head left"><strong>Email I'd</strong></td>
+                                <td class="left_data">:&nbsp;&nbsp; <input type="email" name="email" placeholder="Enter Email I'd" class="input" id="email"></td>
+                                <td class="data_head right"><strong>Remark</strong></td>
+                                <td class="right_data">:&nbsp;&nbsp; <input type="text" name="remark" placeholder="Enter Remark" class="input" id="remark" required></td>
+                            </tr>
+                            <tr>
+                                <td class="data_head left"><strong>Master Card Holder</strong></td>
+                                <td class="left_data">:&nbsp;&nbsp; <input type="text" name="m_card_holder" class="input" id="m_card_holder" value="Mr. <%=name%>" disabled></td>
+                                <td class="data_head right"><strong>Designation</strong></td>
+                                <td class="right_data">:&nbsp;&nbsp; <input type="text" name="post" class="input" id="post" value="<%=post%>" disabled></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <input type="hidden" id="photo_path" name="photo_path" value="">
+                    <div class="btnArea">
+                        <button type="button" id="submitEntryBtn">Submit</button> &nbsp;&nbsp;
+                        <button type="button" id="cancelBtn">Cancel</button> 
+                    </div>
+                    
+                </div>
+            
+                <div class="imageArea">
+                    <div class="image-container" id="imageContainer">
+                        <button id="openBtnWebcam">Capture Image</button>
+                        <video id="video" autoplay style="display: none;"></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                        <img id="photo" src="" alt="" />
+                    </div>
+
+                    <div class="imageBtnArea">
+                        <button id="captureBtn" style="display:none;">Capture</button>
+                        <button id="uploadBtn" style="display:none;">Upload</button>
+                        <button id="retakeBtn" style="display:none;">Retake</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</body>
+
+<script>
+    document.getElementById('name').focus();
+
+      
+    document.getElementById('submitEntryBtn').addEventListener('click', async function() {
+        const name = document.getElementById('name').value;
+        const mobile = document.getElementById('mobile').value;
+        const email = document.getElementById('email').value;
+        const remark = document.getElementById('remark').value;
+        const m_card_holder = document.getElementById('m_card_holder').value;
+        const post = document.getElementById('post').value;
+        const photo_path = document.getElementById('photo_path').value;
+    
+        // Mobile number validation: check if the length is exactly 10 digits
+        if (mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
+            alert('Please enter a valid mobile number with exactly 10 digits.');
+            return; // Exit the function if the validation fails
+        }
+
+        if (photo_path.trim() === "") {
+            alert('Please capture and upload live photo.');
+            return; // Exit the function if the validation fails
+        }
+    
+        const data = {
+            name: name,
+            mobile: mobile,
+            email: email,
+            remark: remark,
+            m_card_holder: m_card_holder,
+            post: post,
+            photo_path: photo_path
+        };
+    
+        try {
+            const response = await fetch('/entry/master/card/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+    
+            if (response.ok) {
+                alert('Entry permitted successfully!');
+                window.location.replace('/login/gate/user');
+            } else {
+                alert('Failed to submit data.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error while submitting data.');
+        }
+    });
+    
+
+    
+
+    const openBtnWebcam = document.getElementById('openBtnWebcam');
+    const captureBtn = document.getElementById('captureBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photo = document.getElementById('photo');
+    const imageContainer = document.getElementById('imageContainer');
+
+    openBtnWebcam.addEventListener('click', () => {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+                video.style.display = 'block';
+                captureBtn.style.display = 'inline-block';  // Show Capture button after opening webcam
+                openBtnWebcam.style.display = 'none';  // Hide Open button after webcam is opened
+            })
+            .catch((err) => {
+                console.log('Error accessing webcam:', err);
+            });
+    });
+
+    // Capture photo
+    captureBtn.addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Capture image as PNG
+        const dataURL = canvas.toDataURL('image/png');  
+
+        // Display captured image in the same container
+        photo.src = dataURL;
+        photo.style.display = 'block';
+        video.style.display = 'none';  // Hide video stream once captured
+
+        // Show Upload and Retake buttons
+        uploadBtn.style.display = 'inline-block';
+        retakeBtn.style.display = 'inline-block';
+        captureBtn.style.display = 'none';  // Hide Capture button after photo is taken
+    });
+
+    retakeBtn.addEventListener('click', () => {
+        photo.style.display = 'none';  // Hide the captured image
+        captureBtn.style.display = 'inline-block';  // Show Capture button again
+        uploadBtn.style.display = 'none';  // Hide Upload button
+        retakeBtn.style.display = 'none';  // Hide Retake button
+
+        video.style.display = 'block';  // Show video stream again
+    });
+
+    uploadBtn.addEventListener('click', () => {
+        const dataURL = photo.src;  // Get the captured image URL (Base64 encoded image)
+    
+        // Extract the image data (remove the data:image/png;base64 part)
+        const base64Data = dataURL.split(',')[1];
+    
+        // Convert base64 data to a Blob
+        const byteCharacters = atob(base64Data);  // Decode the base64 string
+        const byteArrays = [];
+    
+        for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+            const slice = byteCharacters.slice(offset, offset + 1024);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+    
+        const blob = new Blob(byteArrays, { type: 'image/png' });
+        const file = new File([blob], 'image.png', { type: 'image/png' });
+    
+        // Create FormData to send as multipart/form-data
+        const formData = new FormData();
+        formData.append('image', file);  // Add the image file to FormData
+    
+        fetch(`/student/photo/upload/master/masterForm`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Image uploaded successfully!');
+            uploadBtn.style.display = 'none';
+            retakeBtn.style.display = 'none';
+            captureBtn.style.display = 'none';
+            document.getElementById('photo_path').value = data.path;
+            document.getElementById('name').focus();
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Failed to upload image');
+        });
+        
+    }); 
+
+
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+        // AJAX request to server to clear the session data
+        fetch('/login/master/card/data/clear', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ action: 'clear' }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          // After session is cleared, redirect to login entry page
+          window.location.replace('/login/gate/user');
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    });
+
+
+    document.getElementById('logout-btn').addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent the default anchor tag behavior
+        // Make a POST request to the logout API
+        fetch('/login/logout', {
+            method: 'POST', // HTTP method POST
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Handle successful logout (optional)
+                window.location.href = '/'; // Redirect to login page or home page
+            } else {
+                // Handle error response (optional)
+                console.error('Logout failed', response);
+            }
+        })
+        .catch(error => {
+            console.error('An error occurred during logout', error);
+        });
+    });
+</script>

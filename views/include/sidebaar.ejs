@@ -1,0 +1,90 @@
+<div class="sidebar">
+    <div class="title">AccessBand!</div>
+    <% if (role === "SuperAdmin") { %>
+    <a href="/login/manage/user" tabindex="1">
+        <i class="fas fa-user"></i> Manage User
+    </a>
+    <% } %>
+    <a href="/band/issue/reg_no" tabindex="3">
+        <i class="fas fa-users-cog"></i> Band Issue
+    </a>
+
+    <% if (['Admin', 'SuperAdmin'].includes(role)) { %>
+    <a href="/band/action/reg_no" tabindex="3">
+        <i class="fas fa-users-cog"></i> Band Action
+    </a>
+
+    <a href="/entry/add/guest" tabindex="3">
+        <i class="fas fa-user-plus"></i> Add Guest / Vender
+    </a>
+
+    <a href="/misc/activity/details" tabindex="4">
+        <i class="fas fa-cogs"></i> Miscellaneous
+    </a>
+    <% } %>
+    
+    <a href="/entry/details/reg_no" tabindex="5">
+        <i class="fas fa-clipboard-list"></i> Entry Details
+    </a>
+    <% if (['SuperAdmin'].includes(role)) { %>
+    <a href="/reports" tabindex="6">
+        <i class="fas fa-chart-line"></i> Reports
+    </a>
+    <% } %>
+    <% if (['Admin', 'SuperAdmin'].includes(role)) { %>
+    <a href="/Entry/gate/check/In" tabindex="6">
+        <i class="fas fa-arrow-right"></i> Check In
+    </a>
+    <a href="/Entry/gate/check/Out" tabindex="6">
+        <i class="fas fa-arrow-left"></i> Check Out
+    </a>
+    <% } %>
+    <% if (role === "SuperAdmin") { %>
+        <a href="/login/student/bulk/exit" tabindex="6">
+            <i class="fas fa-door-open"></i> Bulk Exit
+        </a>
+    <% } %>
+    <a href="/login/password/change" tabindex="6">
+        <i class="fas fa-lock" ></i> Change Passowrd
+    </a>
+
+    <a href="" id="logout-btn" tabindex="7">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+</div>
+
+<div class="headerWlc" style="position: absolute; top: 8px; right: 20px; color: rgb(41, 21, 7);">
+    Welcome, <%=name%> (<%=post%>)
+</div>
+
+<script>
+    document.getElementById('logout-btn').addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent the default anchor tag behavior
+        // Make a POST request to the logout API
+        fetch('/login/logout', {
+            method: 'POST', // HTTP method POST
+            headers: {
+                'Content-Type': 'application/json', // You may adjust the content type as needed
+                // Add additional headers if necessary (e.g., Authorization)
+            },
+            body: JSON.stringify({
+                // Optional: Send data to the API if needed (e.g., user details, token)
+                // You can send any payload if required, like:
+                // token: 'user-token'
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Handle successful logout (optional)
+                window.location.href = '/'; // Redirect to login page or home page
+            } else {
+                // Handle error response (optional)
+                console.error('Logout failed', response);
+            }
+        })
+        .catch(error => {
+            console.error('An error occurred during logout', error);
+        });
+    });
+    
+</script>

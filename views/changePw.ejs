@@ -1,0 +1,241 @@
+<%- include('./include/boilerplate.ejs') %>
+
+<head>
+    <link rel="stylesheet" href="/CSS/style.css">
+
+    <style>
+        body{
+            background: linear-gradient(135deg, #f1f1f1, #a8c0ff);
+        }
+
+        .input {
+            padding-left: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+            margin-bottom: 20px;
+            font-size: 14px;
+            height: 35px;
+            width: 250px;
+        }
+
+        #change-password-form{
+            gap: 20px;
+        }
+
+        #change-password-form label {
+            padding-left: 2px;
+            padding-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .form_area{
+            padding-left: 50px;
+        }
+
+        #btn_pw{
+            padding: 8px 20px;
+            width: 250px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 15px;
+            background-color: #4C6A92;
+            color: #fff;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        #btn_pw.enabled {
+            cursor: pointer;
+            opacity: 1;
+        }
+
+        .contain_area {
+            position: absolute;
+            right: 200px; /* Adjust this value as needed */
+            top: 130px; /* Adjust this value as needed */
+            font-size: 14px;
+            padding: 20px;
+            background-color: #ffffff; /* Light background for the box */
+        }
+
+        .contain_area p {
+            margin: 10px 0;
+            color: #333; /* Dark text for better readability */
+        }
+
+        .contain_area i {
+            margin-right: 10px;
+            color: #ff6666; /* Red color for the close icon */
+        }
+
+        .contain_area i.fa-check {
+            color: #4CAF50; /* Green color for check icon, in case you use check marks */
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('./include/sidebaar.ejs', {role: user_access_data.role, name: user_access_data.name, post: user_access_data.post}) %>
+
+    <div class="content">
+        <!-- Content box with rounded corners -->
+        <div class="content-box">
+            <!-- Box header with title and button -->
+            <div class="box-header">
+                <h2>Change Password</h2>
+            </div>
+
+            <div class="form_area">
+                <form id="change-password-form" method="post">
+                    <label for="current-password">Current Password</label><br>
+                    <input class="input" type="password" id="current-password" name="current-password" placeholder="Enter Current Password" required>
+                    <br>
+
+                    <label for="new-password">New Password</label><br>
+                    <input class="input" type="password" id="new-password" name="new-password" placeholder="Enter New Password" required>
+                    <br>
+
+                    <label for="confirm-password">Confirm Password</label><br>
+                    <input class="input" type="password" id="confirm-password" name="confirm-password" placeholder="Enter Confirm Password" required>
+                    <br>
+
+                    <button id="btn_pw" type="submit" disabled>Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="contain_area">
+            <p>Password must:</p>
+            <p>&nbsp;&nbsp;&nbsp;<i class="fa fa-close" style="font-size:20px;" id="pw_1"></i> - At least 6 characters</p>
+            <p>&nbsp;&nbsp;&nbsp;<i class="fa fa-close" style="font-size:20px;" id="pw_2"></i> - Cannot contain spaces</p>
+            <p>&nbsp;&nbsp;&nbsp;<i class="fa fa-close" style="font-size:20px;" id="pw_3"></i> - New and confirm are both same</p>
+            <p>&nbsp;&nbsp;&nbsp;<i class="fa fa-close" style="font-size:20px;" id="pw_4"></i> - Current password and new password not same</p>
+        </div>
+    </div>
+</body>
+
+<script>
+    document.getElementById('current-password').focus();
+
+    // Get references to password fields and status icons
+    const currentPassword = document.getElementById('current-password');
+    const newPassword = document.getElementById('new-password');
+    const confirmPassword = document.getElementById('confirm-password');
+    const btnSubmit = document.getElementById('btn_pw');
+    const pw1 = document.getElementById('pw_1');
+    const pw2 = document.getElementById('pw_2');
+    const pw3 = document.getElementById('pw_3');
+    const pw4 = document.getElementById('pw_4');
+
+    // Function to check password conditions
+    function checkPasswordConditions() {
+        const newPwdValue = newPassword.value;
+        const confirmPwdValue = confirmPassword.value;
+        const currentPwdValue = currentPassword.value;
+
+        let allConditionsMet = true;
+
+        // Condition 1: At least 6 characters
+        if (newPwdValue.length >= 6) {
+            pw1.classList.remove('fa-close');
+            pw1.classList.add('fa-check');
+        } else {
+            pw1.classList.remove('fa-check');
+            pw1.classList.add('fa-close');
+            allConditionsMet = false;
+        }
+
+        // Condition 2: Cannot contain spaces
+        if (!newPwdValue.includes(' ')) {
+            pw2.classList.remove('fa-close');
+            pw2.classList.add('fa-check');
+        } else {
+            pw2.classList.remove('fa-check');
+            pw2.classList.add('fa-close');
+            allConditionsMet = false;
+        }
+
+        // Condition 3: New and confirm password are the same
+        if (newPwdValue === confirmPwdValue & newPwdValue.length >= 1) {
+            pw3.classList.remove('fa-close');
+            pw3.classList.add('fa-check');
+        } else {
+            pw3.classList.remove('fa-check');
+            pw3.classList.add('fa-close');
+            allConditionsMet = false;
+        }
+
+        // Condition 4: Current password and new password are not the same
+        if (currentPwdValue !== newPwdValue) {
+            pw4.classList.remove('fa-close');
+            pw4.classList.add('fa-check');
+        } else {
+            pw4.classList.remove('fa-check');
+            pw4.classList.add('fa-close');
+            allConditionsMet = false;
+        }
+
+        // Enable or disable submit button based on conditions
+        if (allConditionsMet) {
+            btnSubmit.disabled = false;
+            btnSubmit.classList.add('enabled');
+        } else {
+            btnSubmit.disabled = true;
+            btnSubmit.classList.remove('enabled');
+        }
+    }
+
+    // Add event listeners to password fields
+    newPassword.addEventListener('input', checkPasswordConditions);
+    confirmPassword.addEventListener('input', checkPasswordConditions);
+    currentPassword.addEventListener('input', checkPasswordConditions);
+
+
+
+    document.getElementById("change-password-form").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Get values from the form
+        const currentPassword = document.getElementById("current-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+
+        // Check if the new password and confirm password match
+        if (newPassword !== confirmPassword) {
+            alert("New password and confirm password do not match.");
+            return;
+        }
+
+        // Send a fetch request to the backend
+        fetch('/login/change/password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                currentPassword: currentPassword,
+                newPassword: newPassword
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Password changed successfully!");
+                // Optionally, redirect or clear the form
+                document.getElementById("change-password-form").reset();
+            } else {
+                alert(data.message); // Show the error message returned from backend
+                document.getElementById("current-password").value = ''; // Clear the current password field
+                document.getElementById("current-password").focus(); // Focus on the current password input
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Something went wrong. Please try again.");
+        });
+    });
+
+</script>

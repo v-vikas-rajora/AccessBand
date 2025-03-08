@@ -1,0 +1,19 @@
+<div id="createUserModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <div class="modal-header" id="user_form_header">Create New User</div>
+        <form id="createUserForm">
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="text" id="post"  placeholder="Post" required>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <select id="role" required>
+                <option value="Admin">Admin</option>
+                <option value="User">User</option>
+                <option value="InUser">Check-In-User</option>
+                <option value="OutUser">Check-Out-User</option>
+            </select>
+            <button type="submit" class="submit-btn create_user_submit">Submit</button>
+        </form>
+    </div>
+</div>
