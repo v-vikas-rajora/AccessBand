@@ -364,39 +364,57 @@ router.get("/misc/activity/view", (req, res) => {
     });
 });
 
-router.post("/mics/activity", (req, res) => {
+router.post("/mics/activity", async (req, res) => {
     const { reg_no, remark, user, post } = req.body;
 
     // Validate the input
     if (!reg_no || !remark) {
-        return res.status(400).json({ success: false, message: "Reg No and Remark are required"});
+        return res.status(400).json({ success: false, message: "Reg No and Remark are required" });
     }
 
+    // Get current date-time in local timezone
     let now = new Date();
     let offset = now.getTimezoneOffset() * 60000; // Offset in milliseconds
     let localDateTime = new Date(now.getTime() - offset);
-    let date_time = localDateTime.toISOString().replace('T', ' ').substring(0, 19).replace(/-/g, '-');
-    console.log(date_time); // Output: "2025-01-19 18:10:32"
+    let date_time = localDateTime.toISOString().replace('T', ' ').substring(0, 19);
 
-    const query = `INSERT INTO m_activity_data (reg_no, date_time, user, post, remark) VALUES ('${reg_no}', '${date_time}', '${user}', '${post}', '${remark}')`;
+    // Hive Blockchain posting credentials
+    const postingKey = "5Jh1ocbybk3nmNWhvy9YD3LHNeSeufgJu3PxkdGmPhW6LuUJ8vf"; // Your Hive private posting key
+    const username = "vikasrajora"; // Your Hive username
 
-    // Execute the SQL query
-    connection.execute(query, (err, results) => {
+    const jsonData = {
+        reg_no: reg_no,
+        date_time: date_time,
+        user: user,
+        post: post,
+        remark: remark
+    };
+
+    const customJsonData = {
+        required_auths: [],
+        required_posting_auths: [username],
+        id: "entry_data",
+        json: JSON.stringify(jsonData)
+    };
+
+    // Broadcast the data to Hive Blockchain
+    hive.broadcast.customJson(postingKey, customJsonData.required_auths, customJsonData.required_posting_auths, customJsonData.id, customJsonData.json, async (err, result) => {
         if (err) {
-            console.error("Error inserting remark:", err.stack);
-            return res.status(500).json({ success: false, message: "Internal server error" });
+            console.error("Error inserting remark to Hive Blockchain:", err.stack);
+            return res.status(500).json({ success: false, message: "Failed to store data on Blockchain" });
         } else {
+            console.log("Data successfully stored on Blockchain!");
 
-            q = `UPDATE student_data SET m_activity = m_activity + 1 WHERE reg_no = '${reg_no}'`;
-
+            // ✅ Update the activity count in MySQL
+            const q = `UPDATE student_data SET m_activity = m_activity + 1 WHERE reg_no = '${reg_no}'`;
             connection.query(q, (err, results) => {
                 if (err) {
-                    console.error(err);
+                    console.error("Error updating activity count:", err.stack);
+                    return res.status(500).json({ success: false, message: "Failed to update activity count in MySQL" });
                 } else {
-                    res.status(200).json({ success: true, message: "Acivity successfully added" });
+                    res.status(200).json({ success: true, message: "Activity successfully added to Blockchain and MySQL" });
                 }
             });
-           
         }
     });
 });
