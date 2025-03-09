@@ -1,4 +1,4 @@
-const { express, mysql, session, bcrypt, flash } = require('../MySQL/include');
+const { express, mysql, session, flash } = require('../MySQL/include');
 const router = express.Router(); 
 const hiveSigner = require('hivesigner');
 const axios = require('axios');
@@ -207,72 +207,6 @@ router.get('/hive-force-login', (req, res) => {
             } else {
                 return res.redirect('/login/manage/user');
             }
-        });
-    });
-});
-
-
-
-router.post('/authenticate', (req, res) => {
-    const { username, password } = req.body;
-
-    // Check if the user exists
-    connection.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
-        if (err) {
-            console.error('Error:', err);
-            return res.status(500).json({ success: false, message: 'Database error occurred.' });
-        }
-
-        if (results.length === 0) {
-            return res.status(400).json({ success: false, message: 'Invalid username or password.' });
-        }
-
-        const user = results[0];
-
-        bcrypt.compare(password, user.password, (err, isMatch) => {
-            if (err) {
-                console.error('Error:', err);
-                return res.status(500).json({ success: false, message: 'Error comparing passwords.' });
-            }
-
-            if (!isMatch) {
-                return res.status(400).json({ success: false, message: 'Invalid username or password.' });
-            }
-
-            if (user.status === 'N') {
-                return res.status(403).json({
-                    success: false,
-                    message: 'Account has been disabled, Kindly Contact to Administrator.'
-                });
-            }
-
-            if (user.current_session_id && user.current_session_id !== req.sessionID) {
-                return res.status(200).json({
-                    success: false,
-                    message: 'You are currently logged in on another device. Would you like to log out from the other session and log in here?',
-                    action_needed: true
-                });
-            }
-
-            // If the user is not already logged in, proceed with logging in
-
-
-            // Update current session ID in the database
-            connection.query('UPDATE users SET current_session_id = ? WHERE username = ?', [req.sessionID, user.username], (err, result) => {
-                if (err) {
-                    console.error('Error updating session ID:', err);
-                    return res.status(500).json({ success: false, message: 'Error updating session.' });
-                }
-
-                req.session.user = user;
-                req.session.user.current_session_id = req.sessionID;
-                // Redirect based on role
-                if (user.role === 'InUser' || user.role === 'OutUser') {
-                    return res.status(200).json({ success: true, redirect_url: '/login/gate/user' });
-                } else {
-                    return res.status(200).json({ success: true, redirect_url: '/login/manage/user' });
-                }
-            });
         });
     });
 });
@@ -489,57 +423,6 @@ router.get('/password/change', (req, res) => {
     }
 });
 
-
-router.post('/change/password', async (req, res) => {
-    if (!req.session && !req.session.user) {
-        res.redirect("/");
-        return;
-    }
-
-    const { currentPassword, newPassword } = req.body;
-    
-    // Get the username from the session
-    const username = req.session.user.username;
-    
-    if (!username) {
-        return res.status(401).json({ success: false, message: 'User is not logged in' });
-    }
-
-    // Query the database to get the user's stored password
-    connection.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ success: false, message: 'Database error' });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-
-        const user = results[0];
-
-        // Compare the current password with the stored password using bcrypt
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
-
-        if (!isMatch) {
-            return res.status(400).json({ success: false, message: 'Current password is incorrect' });
-        }
-
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedNewPassword = await bcrypt.hash(newPassword, salt);
-
-        // Update the user's password in the database
-        connection.query('UPDATE users SET password = ? WHERE username = ?', [hashedNewPassword, username], (err, result) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ success: false, message: 'Database error' });
-            }
-
-            return res.json({ success: true, message: 'Password updated successfully!' });
-        });
-    });
-});
 
 router.post('/master/card/data/clear', (req, res) => {
     // Clear the session data
