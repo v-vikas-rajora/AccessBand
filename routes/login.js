@@ -64,7 +64,7 @@ router.get('/hive-callback', (req, res) => {
 
     return res.send(`
         <script>
-            alert("User Not Found in AccessBand. Please contact administrator.");
+            alert("Your Account Not Registered in AccessBand. Please contact administrator.");
             window.location.href = "/";
         </script>
     `);
