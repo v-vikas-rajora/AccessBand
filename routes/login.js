@@ -52,52 +52,6 @@ router.use("/", (req, res, next) => {
     });
 });
 
-router.post('/check-user', (req, res) => {
-    const { username } = req.body;
-
-    // Check if the user exists
-    connection.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
-        if (err) {
-            console.error('Error:', err);
-            return res.status(500).json({ success: false, message: 'Database error occurred.' });
-        }
-
-        if (results.length === 0) {
-            return res.status(400).json({ success: false, message: 'Invalid username.' });
-        }
-
-        const user = results[0];
-
-        if (user.status === 'N') {
-            return res.status(403).json({
-                success: false,
-                message: 'Account has been disabled, Kindly Contact to Administrator.'
-            });
-        }
-
-        if (user.current_session_id && user.current_session_id !== req.sessionID) {
-            return res.status(200).json({
-                success: false,
-                message: 'You are currently logged in on another device. Would you like to log out from the other session and log in here?',
-                action_needed: true
-            });
-        }
-
-        // ✅ Manually generate Hive Signer URL
-        const client_id = 'accessband';
-        const redirect_uri = 'http://localhost:3000/login/hive-callback';
-        const response_type = 'token';
-        const scope = 'login';
-
-        const hiveLoginURL = `https://hivesigner.com/oauth2/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=${response_type}&scope=${scope}&username=${username}`;
-
-        res.status(200).json({
-            success: true,
-            redirect_url: hiveLoginURL
-        });
-    });
-});
-
 
 router.get('/hive-callback', (req, res) => {
     const { access_token, username } = req.query;
@@ -108,14 +62,19 @@ router.get('/hive-callback', (req, res) => {
         return res.redirect('/');
     }
 
-    // ✅ Step 1: Check if username exists in the database
+    return res.send(`
+        <script>
+            alert("User Not Found in AccessBand. Please contact administrator.");
+            window.location.href = "/";
+        </script>
+    `);
+
     connection.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
         if (err) {
             console.error('Database Error:', err);
             return res.redirect('/');
         }
 
-        // ✅ Step 2: If User Not Found
         if (results.length === 0) {
             console.log('User Not Found');
             return res.send(`
@@ -128,7 +87,6 @@ router.get('/hive-callback', (req, res) => {
 
         const user = results[0];
 
-        // ✅ Step 3: If User is Disabled
         if (user.status === 'N') {
             console.log('Account Disabled');
             return res.send(`
