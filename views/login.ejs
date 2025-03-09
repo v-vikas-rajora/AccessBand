@@ -81,93 +81,17 @@
 </head>
 <body>
     <div class="login-container">
-        <h2>AccessBand!</h2>
-        <form id="loginForm">
-            <input type="text" class="input-field" placeholder="Username" id="username" name="username_input" required>
-            <input type="password" class="input-field" placeholder="Password" name="password_input" required>
-            <button type="submit" class="login-btn">Login</button>
-        </form>
+        <h2>AccessBand - Hive Login</h2>
+        <button class="login-btn" onclick="loginWithHive()">Login with Hive</button>
         <div class="footer-links"></div>
     </div>
 </body>
 </html>
 
 <script>
-    document.getElementById('username').focus();
-
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
-        e.preventDefault();  // Prevent the default form submission
-
-        const username = document.getElementById('username').value;
-        const password = document.querySelector('input[name="password_input"]').value;
-
-        try {
-            const response = await fetch('/login/authenticate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // If login is successful, proceed based on user role
-                window.location.href = result.redirect_url;  // Redirect according to user role
-            } else {
-                if (result.message === 'Account has been disabled, Kindly Contact to Administrator.') {
-                    alert(result.message);
-                    window.location.href = '/';
-                } else if (result.action_needed) {
-                    // Prompt for confirmation if the user is logged in elsewhere
-                    const confirmation = confirm(result.message); // Show Yes/No confirmation dialog
-                    if (confirmation) {
-                        // Yes, log out the other session and log in again
-                        // Send a request to forcefully log out the other session
-                        const logoutResponse = await fetch('/login/force-logout', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ username })  // Send username to log out the other session
-                        });
-
-                        const logoutResult = await logoutResponse.json();
-
-                        if (logoutResult.success) {
-                            // Now proceed with the login process after the other session is logged out
-                            const retryLoginResponse = await fetch('/login/authenticate', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ username, password })
-                            });
-
-                            const retryLoginResult = await retryLoginResponse.json();
-
-                            if (retryLoginResult.success) {
-                                // If login is successful, proceed based on user role
-                                window.location.href = retryLoginResult.redirect_url;  // Redirect according to user role
-                            } else {
-                                alert(retryLoginResult.message);
-                            }
-                        } else {
-                            alert(logoutResult.message);
-                        }
-                    } else {
-                        // No, redirect to home
-                        window.location.href = '/';
-                    }
-                } else {
-                    alert(result.message);
-                }
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred while logging in. Please try again.');
-        }
-    });
+    function loginWithHive() {
+        // ✅ Directly Redirect to Hive Signer (without prompt)
+        window.location.href = "https://hivesigner.com/oauth2/authorize?client_id=accessband&redirect_uri=http://localhost:3000/login/hive-callback&response_type=token&scope=login";
+    }
 </script>
 
