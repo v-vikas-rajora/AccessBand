@@ -1,4 +1,4 @@
-const { express, mysql, session, bcrypt, flash } = require('../MySQL/include');
+const { express, mysql, session, flash } = require('../MySQL/include');
 const router = express.Router(); 
 
 router.use(express.json());
@@ -39,19 +39,14 @@ router.use("/", (req, res, next) => {
 
 router.post("/add", async (req, res) => {
     console.log(req.body); 
-    const {name, post, username, password, role} = req.body;
+    const {name, post, username, role} = req.body;
 
     try {
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const encrypted_pw = await bcrypt.hash(password, salt);
-
-        // Using parameterized query to prevent SQL injection
         const query = `
-            INSERT INTO users (name, post, username, password, role) 
+            INSERT INTO users (name, post, username, role) 
             VALUES (?, ?, ?, ?, ?)
         `;
-        const values = [name, post, username, encrypted_pw, role];
+        const values = [name, post, username, role];
 
         // Execute the query
         connection.query(query, values, (err, results) => {
@@ -106,7 +101,7 @@ router.post('/master/card/update', (req, res) => {
 
 router.put('/update/:userId', async (req, res) => {
     const userId = req.params.userId; // Extract userId from the URL
-    const { name, post, username, password, role } = req.body; // Extract updated details from the request body
+    const { name, post, username, role } = req.body; // Extract updated details from the request body
 
     if (!name || !post || !username || !role) {
         return res.status(400).json({ success: false, message: 'All fields are required' });
@@ -114,27 +109,13 @@ router.put('/update/:userId', async (req, res) => {
 
     let query;
 
-    let encrypted_pw;
-    if (password) {
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        encrypted_pw = await bcrypt.hash(password, salt);
-
-        query = `
-        UPDATE users
-        SET name = ?, post = ?, username = ?, password = ?, role = ?
-        WHERE username = ?`;
-
-        values = [name, post, username, encrypted_pw, role, userId];
-        
-    } else {
+ 
         query = `
         UPDATE users
         SET name = ?, post = ?, username = ?, role = ?
         WHERE username = ?`;
 
         values = [name, post, username, role, userId];
-    }
 
 
     // Execute the query

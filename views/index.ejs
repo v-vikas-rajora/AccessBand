@@ -40,7 +40,6 @@
         document.getElementById('createUserForm').reset(); // Reset the form
         document.querySelector('.create_user_submit').innerText = 'Submit'; // Set submit button to 'Submit'
         document.getElementById('createUserForm').dataset.action = 'create'; // Track form action
-        document.getElementById('password').setAttribute('required');
     }
 
     // Open modal for updating a user
@@ -55,8 +54,6 @@
         document.getElementById('post').value = post;
         document.getElementById('username').value = username;
         document.getElementById('role').value = role;
-        document.getElementById('password').value = '';
-        document.getElementById('password').removeAttribute('required');
     
         document.querySelector('.create_user_submit').innerText = 'Update'; // Change button text to Update
         document.getElementById('createUserForm').dataset.action = 'update'; // Track form action
@@ -108,7 +105,6 @@
         const name = document.getElementById('name').value;
         const post = document.getElementById('post').value;
         const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
         const role = document.getElementById('role').value;  // Get selected role
         
         const action = document.getElementById('createUserForm').dataset.action; // "create" or "update"
@@ -121,7 +117,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, post, username, password, role })
+                body: JSON.stringify({ name, post, username, role })
             })
             .then(response => response.json())
             .then(data => {
@@ -178,7 +174,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, post, username, role, password }) // Send the role as selected from the dropdown
+                body: JSON.stringify({ name, post, username, role}) // Send the role as selected from the dropdown
             })
             .then(response => response.json())
             .then(data => {
