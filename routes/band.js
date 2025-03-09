@@ -1,21 +1,26 @@
 const { express, mysql, session, bcrypt, flash } = require('../MySQL/include');
 const router = express.Router(); 
 
+require('dotenv').config();
 const hive = require("@hiveio/hive-js");
 const getBlockchainBarcode = require("../blockChain/barcodeFuntion");
-const HIVE_ACCOUNT = "vikasrajora"; // Your Hive account name
-const HIVE_KEY = "5Jh1ocbybk3nmNWhvy9YD3LHNeSeufgJu3PxkdGmPhW6LuUJ8vf"; // Your private posting key (keep it secure)
+
+const dbHost = process.env.HOST;
+const dbUser = process.env.USER;
+const database = process.env.DATABASE;
+const dbPassword = process.env.PASSWORD;
+const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
+const HIVE_KEY = process.env.HIVE_KEY;
 
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(flash());
 
-const dbPassword = require('../MySQL/config');
 const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "event_0225",
+    host: dbHost,
+    user: dbUser,
+    database: database,
     password: dbPassword,
 });
 

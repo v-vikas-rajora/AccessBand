@@ -4,17 +4,24 @@ const router = express.Router();
 const hive = require("@hiveio/hive-js");
 const getAllBlockchainEntryData = require("../blockChain/reportsFunction");
 
+require('dotenv').config();
+
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(flash());
 
-const dbPassword = require('../MySQL/config');
+const dbHost = process.env.HOST;
+const dbUser = process.env.USER;
+const database = process.env.DATABASE;
+const dbPassword = process.env.PASSWORD;
+const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
+const HIVE_KEY = process.env.HIVE_KEY;
 
 const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "event_0225",
+    host: dbHost,
+    user: dbUser,
+    database: database,
     password: dbPassword,
 });
 
@@ -160,7 +167,7 @@ router.get('/fetch/bulkExit', async (req, res) => {
 async function getBlockchainData() {
     try {
         const result = await hive.api.callAsync('condenser_api.get_account_history', [
-            'vikasrajora',
+            HIVE_ACCOUNT,
             -1,
             1000
         ]);
@@ -223,7 +230,7 @@ router.get('/fetch/data', async (req, res) => {
             } else {
                 // Pura data nikalne ke liye fetch karna padega
                 const result = await hive.api.callAsync('condenser_api.get_account_history', [
-                    'vikasrajora',
+                    HIVE_ACCOUNT,
                     -1,
                     1000
                 ]);

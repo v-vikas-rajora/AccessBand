@@ -5,11 +5,20 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(flash());
 
-const dbPassword = require('../MySQL/config');
+require('dotenv').config();
+
+
+const dbHost = process.env.HOST;
+const dbUser = process.env.USER;
+const database = process.env.DATABASE;
+const dbPassword = process.env.PASSWORD;
+const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
+const HIVE_KEY = process.env.HIVE_KEY;
+
 const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "event_0225",
+    host: dbHost,
+    user: dbUser,
+    database: database,
     password: dbPassword,
 });
 

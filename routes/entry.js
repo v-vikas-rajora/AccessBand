@@ -4,18 +4,23 @@ const router = express.Router();
 const hive = require("@hiveio/hive-js");
 const { getBlockchainData, storeBlockchainData } = require("../blockChain/entryFuntion");
 const getBlockchainBarcode = require("../blockChain/barcodeFuntion");
+require('dotenv').config();
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(flash());
 
-const dbPassword = require('../MySQL/config');
-
+const dbHost = process.env.HOST;
+const dbUser = process.env.USER;
+const database = process.env.DATABASE;
+const dbPassword = process.env.PASSWORD;
+const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
+const HIVE_KEY = process.env.HIVE_KEY;
 
 const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "event_0225",
+    host: dbHost,
+    user: dbUser,
+    database: database,
     password: dbPassword,
 });
 
@@ -267,7 +272,7 @@ router.post("/gate/:role/:action", (req, res) => {
                                 storeBlockchainData('entry_data', st_data.reg_no, {
                                     reg_no: st_data.reg_no, 
                                     date_time_in: date_time, 
-                                    user_in: username 
+                                    user_in: HIVE_ACCOUNT 
                                 }).then(() => updateStatus());
                             }
                         } else if (action === "Out") {
@@ -294,7 +299,7 @@ router.post("/gate/:role/:action", (req, res) => {
                                 storeBlockchainData('exit_data', st_data.reg_no, { 
                                     reg_no: st_data.reg_no, 
                                     date_time_out: date_time, 
-                                    user_out: username 
+                                    user_out: HIVE_ACCOUNT 
                                 }).then(() => updateStatus());
                             }
                         }
@@ -356,7 +361,7 @@ router.post("/gate/:role/:action", (req, res) => {
 router.get("/misc/activity/view", (req, res) => {
     const { reg_no } = req.query;
 
-    hive.api.getAccountHistory('vikasrajora', -1, 1000, (err, result) => {
+    hive.api.getAccountHistory(HIVE_ACCOUNT, -1, 1000, (err, result) => {
         if (err) {
             console.error('Error fetching data from blockchain:', err);
             return res.status(500).json({ success: false, message: 'Error fetching data from blockchain' });
@@ -400,9 +405,8 @@ router.post("/mics/activity", async (req, res) => {
     let localDateTime = new Date(now.getTime() - offset);
     let date_time = localDateTime.toISOString().replace('T', ' ').substring(0, 19);
 
-    // Hive Blockchain posting credentials
-    const postingKey = "5Jh1ocbybk3nmNWhvy9YD3LHNeSeufgJu3PxkdGmPhW6LuUJ8vf";
-    const username = "vikasrajora";
+
+    
 
     const jsonData = {
         reg_no: reg_no,
@@ -414,13 +418,13 @@ router.post("/mics/activity", async (req, res) => {
 
     const customJsonData = {
         required_auths: [],
-        required_posting_auths: [username],
+        required_posting_auths: [HIVE_ACCOUNT],
         id: "m_activity_data",
         json: JSON.stringify(jsonData)
     };
 
     // Broadcast the data to Hive Blockchain
-    hive.broadcast.customJson(postingKey, customJsonData.required_auths, customJsonData.required_posting_auths, customJsonData.id, customJsonData.json, async (err, result) => {
+    hive.broadcast.customJson(HIVE_KEY, customJsonData.required_auths, customJsonData.required_posting_auths, customJsonData.id, customJsonData.json, async (err, result) => {
         if (err) {
             console.error("Error inserting remark to Hive Blockchain:", err.stack);
             return res.status(500).json({ success: false, message: "Failed to store data on Blockchain" });
@@ -576,7 +580,7 @@ router.post('/master/card/', async (req, res) => {
 
                 // Now insert into the entry_data table
                 const entryDataQuery = 'INSERT INTO entry_data (reg_no, date_time_in, user_in) VALUES (?, ?, ?)';
-                const entryDataValues = [id, date_time, req.session.user.username];
+                const entryDataValues = [id, date_time, req.session.user.HIVE_ACCOUNT];
 
                 connection.query(entryDataQuery, entryDataValues, (err, results) => {
                     if (err) {

@@ -6,18 +6,24 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(flash());
 
+require('dotenv').config();
+
 const hive = require("@hiveio/hive-js");
 
-const HIVE_ACCOUNT = "vikasrajora";
-const HIVE_KEY = "5Jh1ocbybk3nmNWhvy9YD3LHNeSeufgJu3PxkdGmPhW6LuUJ8vf";
 
 
-const dbPassword = require('../MySQL/config');
+const dbHost = process.env.HOST;
+const dbUser = process.env.USER;
+const database = process.env.DATABASE;
+const dbPassword = process.env.PASSWORD;
+const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
+const HIVE_KEY = process.env.HIVE_KEY;
+
 
 const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "event_0225",
+    host: dbHost,
+    user: dbUser,
+    database: database,
     password: dbPassword,
 });
 

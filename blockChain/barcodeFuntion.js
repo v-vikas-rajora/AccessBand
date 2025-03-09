@@ -1,7 +1,10 @@
 const hive = require("@hiveio/hive-js");
 
-const HIVE_ACCOUNT = "vikasrajora";
-const HIVE_KEY = "5Jh1ocbybk3nmNWhvy9YD3LHNeSeufgJu3PxkdGmPhW6LuUJ8vf";
+require('dotenv').config();
+
+
+const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
+const HIVE_KEY = process.env.HIVE_KEY;
 
 async function getBlockchainBarcode(reg_no) {
     try {
