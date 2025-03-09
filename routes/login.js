@@ -20,11 +20,19 @@ const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
 const HIVE_KEY = process.env.HIVE_KEY;
 
 
+// const connection = mysql.createConnection({
+//     host: dbHost,
+//     user: dbUser,
+//     database: database,
+//     password: dbPassword,
+//     port: 3306
+// });
+
 const connection = mysql.createConnection({
-    host: dbHost,
-    user: dbUser,
-    database: database,
-    password: dbPassword,
+    host: 'mysql.railway.internal',
+    user: 'root',
+    database: 'railway',
+    password: 'ZADjyhjuqsLpqIpjKMiLIDxBTZjEIgJx',
     port: 3306
 });
 

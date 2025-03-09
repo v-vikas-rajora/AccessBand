@@ -17,11 +17,19 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(flash());
 
+// const connection = mysql.createConnection({
+//     host: dbHost,
+//     user: dbUser,
+//     database: database,
+//     password: dbPassword,
+//     port: 3306
+// });
+
 const connection = mysql.createConnection({
-    host: dbHost,
-    user: dbUser,
-    database: database,
-    password: dbPassword,
+    host: 'mysql.railway.internal',
+    user: 'root',
+    database: 'railway',
+    password: 'ZADjyhjuqsLpqIpjKMiLIDxBTZjEIgJx',
     port: 3306
 });
 
