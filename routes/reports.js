@@ -18,13 +18,13 @@ const dbPassword = process.env.DB_PASSWORD;
 const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
 const HIVE_KEY = process.env.HIVE_KEY;
 
-const connection = mysql.createConnection({
-    host: dbHost,
-    user: dbUser,
-    database: database,
-    password: dbPassword,
-    port: 24593
-});
+// const connection = mysql.createConnection({
+//     host: dbHost,
+//     user: dbUser,
+//     database: database,
+//     password: dbPassword,
+// });
+
 
 router.use("/", (req, res, next) => {
     connection.query('SELECT current_session_id FROM users WHERE username = ?', [req.session.user.username], (err, result) => {

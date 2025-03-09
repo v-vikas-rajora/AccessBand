@@ -10,8 +10,6 @@ require('dotenv').config();
 
 const hive = require("@hiveio/hive-js");
 
-
-
 const dbHost = process.env.DB_HOST;
 const dbUser = process.env.DB_USER;
 const database = process.env.DB_DATABASE;
@@ -20,21 +18,14 @@ const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
 const HIVE_KEY = process.env.HIVE_KEY;
 
 
+
 // const connection = mysql.createConnection({
 //     host: dbHost,
 //     user: dbUser,
 //     database: database,
 //     password: dbPassword,
-//     port: 3306
 // });
 
-const connection = mysql.createConnection({
-    host: dbHost,
-    user: dbUser,
-    database: database,
-    password: dbPassword,
-    port: 24593
-});
 
 router.use("/", (req, res, next) => {
     if (req.path === '/authenticate' || req.path === '/force-logout'|| req.path === '/hive-force-login'|| req.path === '/hive-callback') {
