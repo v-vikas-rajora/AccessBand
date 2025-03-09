@@ -25,6 +25,7 @@ const connection = mysql.createConnection({
     user: dbUser,
     database: database,
     password: dbPassword,
+    port: 3306
 });
 
 router.use("/", (req, res, next) => {
