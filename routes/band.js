@@ -26,10 +26,10 @@ router.use(flash());
 // });
 
 const connection = mysql.createConnection({
-    host: 'mysql.railway.internal',
-    user: 'root',
-    database: 'railway',
-    password: 'ZADjyhjuqsLpqIpjKMiLIDxBTZjEIgJx',
+    host: dbHost,
+    user: dbUser,
+    database: database,
+    password: dbPassword,
     port: 3306
 });
 
