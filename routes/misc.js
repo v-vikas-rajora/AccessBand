@@ -8,10 +8,10 @@ router.use(flash());
 require('dotenv').config();
 
 
-const dbHost = process.env.HOST;
-const dbUser = process.env.USER;
-const database = process.env.DATABASE;
-const dbPassword = process.env.PASSWORD;
+const dbHost = process.env.DB_HOST;
+const dbUser = process.env.DB_USER;
+const database = process.env.DB_DATABASE;
+const dbPassword = process.env.DB_PASSWORD;
 const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
 const HIVE_KEY = process.env.HIVE_KEY;
 
