@@ -17,12 +17,12 @@ const dbPassword = process.env.DB_PASSWORD;
 const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
 const HIVE_KEY = process.env.HIVE_KEY;
 
-// const connection = mysql.createConnection({
-//     host: dbHost,
-//     user: dbUser,
-//     database: database,
-//     password: dbPassword,
-// });
+const connection = mysql.createConnection({
+    host: dbHost,
+    user: dbUser,
+    database: database,
+    password: dbPassword,
+});
 
 router.use("/", (req, res, next) => {
     connection.query('SELECT current_session_id FROM users WHERE username = ?', [req.session.user.username], (err, result) => {
@@ -64,13 +64,11 @@ router.get("/details", async (req, res) => {
         if (barcodeData) {
             barcode_type = barcodeData.barcode_type;
             console.log("✅ Barcode Type from Blockchain:", barcode_type);
-
             let q = `SELECT * FROM ${barcode_type} WHERE barcode = '${reg_no}'`;
             aa(q);
         } else {
             return res.render('master.ejs', { form_type: 'action', barcode_type: '', errorMessage: 'Invalid barcode' });
         }
-
     }
      else if (reg_no.includes("/") && reg_no.length > 5 && reg_no.length < 11) {
         let q = `SELECT * FROM student_data WHERE reg_no = '${reg_no}'`;
@@ -155,7 +153,6 @@ router.get("/details", async (req, res) => {
     }
 });
 
-
 router.get('/gate/check/:action', (req, res) => {   
     if (!['Admin', 'SuperAdmin', 'User'].includes(req.session.user.role)) {
         res.redirect("/login/manage/user");
@@ -180,29 +177,25 @@ router.post("/gate/:role/:action", (req, res) => {
     let barcode_type;
 
     if (reg_no.startsWith('PU') || reg_no.startsWith('PGC')) {
-        let checkQ = `SELECT barcode_type FROM barcode_data WHERE barcode = '${reg_no}'`;
-
         getBlockchainBarcode(reg_no)
             .then(blockchainResult => {
                 if (blockchainResult) {
                     barcode_type = blockchainResult.barcode_type;
-                    console.log("✅ Blockchain Barcode Type:", barcode_type);
-                    let q = `SELECT * FROM ${barcode_type} WHERE barcode = '${reg_no}'`;
+                    let q;
+                    if (barcode_type === 'guest_data') {
+                        q = `SELECT guest_data.*, faculty_data.name AS eName, faculty_data.email AS eEmail 
+                        FROM guest_data
+                        LEFT JOIN faculty_data ON guest_data.emp_id = faculty_data.reg_no 
+                        WHERE guest_data.barcode = '${reg_no}'`;
+                    } else {
+                        q = `SELECT * FROM ${barcode_type} WHERE barcode = '${reg_no}'`;
+                    }
+                    
+                    console.log(q);
                     fetchUserData(q);
                 } else {
-                    connection.query(checkQ, (err, results) => {
-                        if (err) {
-                            console.error("SQL Query Error:", err);
-                        } else if (results.length > 0) {
-                            barcode_type = results[0].barcode_type;
-                            console.log("SQL Barcode Type:", barcode_type);
-                            let q = `SELECT * FROM ${barcode_type} WHERE barcode = '${reg_no}'`;
-                            fetchUserData(q);
-                        } else {
-                            console.log("Barcode not found in both Blockchain and SQL.");
-                            res.render('error', { message: "Barcode not found." });
-                        }
-                    });
+                    console.log("Barcode not found in both Blockchain and SQL.");
+                    res.render('error', { message: "Barcode not found." });
                 }
             })
             .catch(err => {
@@ -239,13 +232,10 @@ router.post("/gate/:role/:action", (req, res) => {
                 let date_time = localDateTime.toISOString().replace('T', ' ').substring(0, 19).replace(/-/g, '-');
 
                 const st_data = results[0];
-
                 let errorTypeData;
 
                 getBlockchainData(st_data.reg_no)
                     .then(entry_data => {
-                        console.log('Data fetched:', entry_data);
-
                         if (action === "In") {
                             if (st_data.c_status === "In") {
                                 if (['Admin', 'SuperAdmin', 'User'].includes(role)) {
@@ -268,12 +258,12 @@ router.post("/gate/:role/:action", (req, res) => {
                             } else {
                                 q2 = `UPDATE ${barcode_type} SET c_status='In', c_id = '${date_time}' WHERE reg_no = '${st_data.reg_no}'`;
                                 errorTypeData = "success_in";
-
+                                let status = 'In';
                                 storeBlockchainData('entry_data', st_data.reg_no, {
                                     reg_no: st_data.reg_no, 
                                     date_time_in: date_time, 
                                     user_in: HIVE_ACCOUNT 
-                                }).then(() => updateStatus());
+                                }).then(() => updateStatus(entry_data, status, date_time));
                             }
                         } else if (action === "Out") {
                             if (st_data.c_status === "Out") {
@@ -295,18 +285,18 @@ router.post("/gate/:role/:action", (req, res) => {
                             } else {
                                 q2 = `UPDATE ${barcode_type} SET c_status='Out' WHERE reg_no = '${st_data.reg_no}'`;
                                 errorTypeData = "success_out";
-
+                                let status = 'Out';
                                 storeBlockchainData('exit_data', st_data.reg_no, { 
                                     reg_no: st_data.reg_no, 
                                     date_time_out: date_time, 
                                     user_out: HIVE_ACCOUNT 
-                                }).then(() => updateStatus());
+                                }).then(() => updateStatus(entry_data, status, date_time));
                             }
                         }
                     })
                     .catch(err => console.error("Error fetching entry data from blockchain:", err));
 
-                    function updateStatus() {
+                    function updateStatus(entry_data, status, date_time) {
                         console.log('yessss');
                         if (q2) {
                             connection.query(q2, (err, results) => {
@@ -314,44 +304,42 @@ router.post("/gate/:role/:action", (req, res) => {
                                     console.log("Error updating barcode status in SQL:", err);
                                 } else {
                                     console.log("Barcode status updated successfully:", q2);
+                                    if (['Admin', 'SuperAdmin', 'User'].includes(role)) {
+                                        res.render('entry', { 
+                                            bandData: st_data, 
+                                            entryD: 'yes', 
+                                            barcode_type, 
+                                            errorType: errorTypeData, 
+                                            entry_data, 
+                                            status,
+                                            date_time,
+                                            action: action 
+                                        });
+                                    } else {
+                                        res.render('f-entry', { 
+                                            bandData: st_data, 
+                                            entryD: 'yes', 
+                                            barcode_type, 
+                                            name, 
+                                            post, 
+                                            errorType: errorTypeData, 
+                                            entry_data,
+                                            status,
+                                            date_time,
+                                            role: role, 
+                                            f: '' 
+                                        });
+                                    }
                                 }
-                    
-                                getBlockchainData(st_data.reg_no)
-                                    .then(entry_data1 => {    
-                                        console.log(entry_data1);
-                                        console.log('okk', entry_data1);
-                                        if (['Admin', 'SuperAdmin', 'User'].includes(role)) {
-                                            res.render('entry', { 
-                                                bandData: st_data, 
-                                                entryD: 'yes', 
-                                                barcode_type, 
-                                                errorType: errorTypeData, 
-                                                entry_data: entry_data1, 
-                                                action: action 
-                                            });
-                                        } else {
-                                            res.render('f-entry', { 
-                                                bandData: st_data, 
-                                                entryD: 'yes', 
-                                                barcode_type, 
-                                                name, 
-                                                post, 
-                                                errorType: errorTypeData, 
-                                                entry_data: entry_data1, 
-                                                role: role, 
-                                                f: '' 
-                                            });
-                                        }
-                                    })
-                                    .catch(err => {
-                                        console.error("Error fetching entry_data from Blockchain:", err);
-                                        res.send("Error retrieving data from Blockchain");
-                                    });
                             });
                         }
                     }
             } else {
-                res.render('master.ejs', { form_type: action, errorMessage: '' });
+                if (['Admin', 'SuperAdmin', 'User'].includes(role)) {
+                    res.render('master.ejs', {form_type: action, errorMessage: ''});
+                } else {
+                    res.render("f-entry", {role: role, f: 'first', errorType: '', name, post});
+                }
             }
         });
     }

@@ -19,12 +19,12 @@ const HIVE_KEY = process.env.HIVE_KEY;
 
 
 
-// const connection = mysql.createConnection({
-//     host: dbHost,
-//     user: dbUser,
-//     database: database,
-//     password: dbPassword,
-// });
+const connection = mysql.createConnection({
+    host: dbHost,
+    user: dbUser,
+    database: database,
+    password: dbPassword,
+});
 
 
 router.use("/", (req, res, next) => {
@@ -62,19 +62,14 @@ router.get('/hive-callback', (req, res) => {
         return res.redirect('/');
     }
 
-    return res.send(`
-        <script>
-            alert("User Not Found in AccessBand. Please contact administrator.");
-            window.location.href = "/";
-        </script>
-    `);
-
+    // ✅ Step 1: Check if username exists in the database
     connection.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
         if (err) {
             console.error('Database Error:', err);
             return res.redirect('/');
         }
 
+        // ✅ Step 2: If User Not Found
         if (results.length === 0) {
             console.log('User Not Found');
             return res.send(`
@@ -87,6 +82,7 @@ router.get('/hive-callback', (req, res) => {
 
         const user = results[0];
 
+        // ✅ Step 3: If User is Disabled
         if (user.status === 'N') {
             console.log('Account Disabled');
             return res.send(`

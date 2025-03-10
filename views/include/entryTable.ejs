@@ -8,6 +8,7 @@
         </tr>
     </thead>
     <tbody>
+        <% if (entry_data) { %> 
         <% 
         // Reverse the entry data array to show latest first
         entry_data.reverse().forEach(function(entry) { 
@@ -42,5 +43,59 @@
                 <td data-label="Time Out"><%= formattedTimeOut %></td>
             </tr>
         <% }); %>
+        <% } %>
     </tbody>
 </table>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const status = "<%= typeof status !== 'undefined' ? status : '' %>";  // Status from EJS
+        const statusDateTime = "<%= typeof date_time !== 'undefined' ? date_time : '' %>"; // Full Date Time from EJS
+        const tbody = document.querySelector(".entryTable tbody");
+
+        if(status !== '') {
+            // Convert DateTime into Date and Time
+            let dateTime = new Date(statusDateTime);
+            
+            // Format Date as DD-MMM-YYYY
+            let formattedDate = dateTime.toLocaleDateString('en-GB', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            });
+            let dateParts = formattedDate.split(' ');
+            formattedDate = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`;
+            
+            // Format Time as HH:MM:SS AM/PM
+            let formattedTime = dateTime.toLocaleTimeString('en-US', {
+                hour12: true
+            });
+
+            if(status === 'In') {
+                // 'In' ka TR add karo
+                const newRow = document.createElement("tr");
+                newRow.innerHTML = `
+                    <td data-label="Date In">${formattedDate}</td>
+                    <td data-label="Time In">${formattedTime}</td>
+                    <td data-label="Date Out">N/A</td>
+                    <td data-label="Time Out">N/A</td>
+                `;
+                tbody.insertBefore(newRow, tbody.firstChild);
+            }
+
+            if(status === 'Out') {
+                // 'Out' ka TR update karo jisme Date Out = N/A ho
+                const allRows = tbody.querySelectorAll("tr");
+                for(let row of allRows) {
+                    const dateOut = row.children[2].innerText;
+                    const timeOut = row.children[3].innerText;
+                    
+                    if(dateOut === 'N/A' && timeOut === 'N/A') {
+                        row.children[2].innerText = formattedDate;
+                        row.children[3].innerText = formattedTime;
+                        break;
+                    }
+                }
+            }
+        }
+    });
+</script>

@@ -18,12 +18,12 @@ router.use(express.urlencoded({ extended: true }));
 router.use(flash());
 
 
-// const connection = mysql.createConnection({
-//     host: dbHost,
-//     user: dbUser,
-//     database: database,
-//     password: dbPassword,
-// });
+const connection = mysql.createConnection({
+    host: dbHost,
+    user: dbUser,
+    database: database,
+    password: dbPassword,
+});
 
 router.use("/", (req, res, next) => {
     connection.query('SELECT current_session_id FROM users WHERE username = ?', [req.session.user.username], (err, result) => {

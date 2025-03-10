@@ -1,6 +1,7 @@
 const { express, mysql, session, bcrypt, flash } = require('../MySQL/include');
 const router = express.Router(); 
 
+const hive = require("@hiveio/hive-js");
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(flash());
@@ -15,12 +16,12 @@ const dbPassword = process.env.DB_PASSWORD;
 const HIVE_ACCOUNT = process.env.HIVE_ACCOUNT;
 const HIVE_KEY = process.env.HIVE_KEY;
 
-// const connection = mysql.createConnection({
-//     host: dbHost,
-//     user: dbUser,
-//     database: database,
-//     password: dbPassword,
-// });
+const connection = mysql.createConnection({
+    host: dbHost,
+    user: dbUser,
+    database: database,
+    password: dbPassword,
+});
 
 
 
@@ -41,24 +42,66 @@ router.use("/", (req, res, next) => {
     });
 });
 
-router.get("/activity/details", (req, res) => {
-    q = `SELECT DISTINCT mad.reg_no, sd.name, sd.f_name, sd.school, sd.program, sd.sem, sd.section, sd.mobile, sd.m_activity, sd.status FROM m_activity_data mad JOIN student_data sd ON mad.reg_no = sd.reg_no`;
-    
-    connection.query(q, (err, results) => {
-        if (err) {
-            console.error('Error fetching users:', err);
-            res.status(500).send('Error fetching users');
-        } else {
-            // Render the page and pass the users data
-            res.render('m_activity.ejs', { users: results });
-        }
-    });
+router.get("/activity/details", async (req, res) => {
+    try {
+
+        hive.api.getAccountHistory(HIVE_ACCOUNT, -1, 1000, (err, result) => {
+            if (err) {
+                console.error('Error fetching from blockchain:', err);
+                return res.status(500).send('Error fetching from blockchain');
+            }
+
+            // Step 2: Filter only 'custom_json' of type 'm_activity_data'
+            const activityData = result
+                .map(tx => tx[1].op)
+                .filter(op => op[0] === 'custom_json' && op[1].id === 'm_activity_data')
+                .map(op => JSON.parse(op[1].json));
+
+            // ✅ Step 3: Extract DISTINCT reg_no from blockchain
+            const regNos = [...new Set(activityData.map(item => item.reg_no))]; // Distinct reg_no
+
+            if (regNos.length === 0) {
+                return res.render('m_activity.ejs', { users: [] });
+            }
+
+            // Step 4: SQL Query to fetch student data for those DISTINCT reg_no
+            const q = `
+                SELECT DISTINCT sd.reg_no, sd.name, sd.f_name, sd.school, sd.program, 
+                sd.sem, sd.section, sd.mobile, sd.status, sd.m_activity
+                FROM student_data sd
+                WHERE sd.reg_no IN (${regNos.map(() => '?').join(',')})`;
+
+            connection.query(q, regNos, (err, results) => {
+                if (err) {
+                    console.error('Error fetching users:', err);
+                    return res.status(500).send('Error fetching users');
+                }
+
+                // Step 5: Combine Blockchain data with MySQL data
+                const combinedData = regNos.map(regNo => {
+                    const student = results.find(s => s.reg_no === regNo);
+                    const activity = activityData.find(a => a.reg_no === regNo);
+                    return {
+                        ...activity,
+                        ...student
+                    };
+                });
+
+                // Step 6: Render EJS template with Combined Data
+                res.render('m_activity.ejs', { users: combinedData });
+            });
+        });
+
+    } catch (error) {
+        console.error('Unexpected Error:', error);
+        res.status(500).send('Unexpected Error');
+    }
 });
+
 router.put('/student/account/:action', (req, res) => {
-    const action = req.params.action;  // Either 'enable' or 'disable'
-    let { reg_no, remark } = req.body;  // The student’s registration number and remark
+    const action = req.params.action;
+    let { reg_no, remark } = req.body;
     
-    // Check that reg_no is provided
     if (!reg_no) {  
         return res.status(400).json({ success: false, message: 'Missing reg_no' });
     }

@@ -178,7 +178,7 @@
             
                 <!-- Image container -->
                 <div class="image-container">
-                    <img src="/<%=barcode_type === 'faculty_data' ? 'staff-' : ''%>Images/<%=bandData.photo_path%>.jpg" alt="User Image"> <!-- Placeholder passport-size image -->
+                    <img src="/<%= barcode_type === 'faculty_data' ? 'staff-' : barcode_type === 'master_entry' || barcode_type === 'guest_data'  ? 'master-entry-' : '' %>Images/<%= bandData.photo_path %>.jpg" alt="User Image">
                 </div>
             </div>
             
