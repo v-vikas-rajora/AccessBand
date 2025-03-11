@@ -44,7 +44,7 @@ router.post("/add", async (req, res) => {
     try {
         const query = `
             INSERT INTO users (name, post, username, role) 
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?)
         `;
         const values = [name, post, username, role];
 
