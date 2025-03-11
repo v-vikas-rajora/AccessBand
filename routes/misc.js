@@ -50,33 +50,39 @@ router.get("/activity/details", async (req, res) => {
                 console.error('Error fetching from blockchain:', err);
                 return res.status(500).send('Error fetching from blockchain');
             }
-
-            // Step 2: Filter only 'custom_json' of type 'm_activity_data'
+        
+            // Step 2: Filter only 'custom_json' of type 'm_activity_data' and today's date
+            const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+        
             const activityData = result
                 .map(tx => tx[1].op)
-                .filter(op => op[0] === 'custom_json' && op[1].id === 'm_activity_data')
+                .filter(op => 
+                    op[0] === 'custom_json' && 
+                    op[1].id === 'm_activity_data' && 
+                    JSON.parse(op[1].json).date === today // ✅ Filter today's data only
+                )
                 .map(op => JSON.parse(op[1].json));
-
+        
             // ✅ Step 3: Extract DISTINCT reg_no from blockchain
             const regNos = [...new Set(activityData.map(item => item.reg_no))]; // Distinct reg_no
-
+        
             if (regNos.length === 0) {
                 return res.render('m_activity.ejs', { users: [] });
             }
-
+        
             // Step 4: SQL Query to fetch student data for those DISTINCT reg_no
             const q = `
                 SELECT DISTINCT sd.reg_no, sd.name, sd.f_name, sd.school, sd.program, 
                 sd.sem, sd.section, sd.mobile, sd.status, sd.m_activity
                 FROM student_data sd
                 WHERE sd.reg_no IN (${regNos.map(() => '?').join(',')})`;
-
+        
             connection.query(q, regNos, (err, results) => {
                 if (err) {
                     console.error('Error fetching users:', err);
                     return res.status(500).send('Error fetching users');
                 }
-
+        
                 // Step 5: Combine Blockchain data with MySQL data
                 const combinedData = regNos.map(regNo => {
                     const student = results.find(s => s.reg_no === regNo);
@@ -86,11 +92,12 @@ router.get("/activity/details", async (req, res) => {
                         ...student
                     };
                 });
-
+        
                 // Step 6: Render EJS template with Combined Data
                 res.render('m_activity.ejs', { users: combinedData });
             });
         });
+        
 
     } catch (error) {
         console.error('Unexpected Error:', error);
